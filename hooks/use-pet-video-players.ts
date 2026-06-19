@@ -20,10 +20,6 @@ export function usePetVideoPlayers(): PetVideoPlayerPool {
     PET_VIDEO_SOURCES.happy_bounce,
     setupPlayer,
   );
-  const happy_bounce2 = useVideoPlayer(
-    PET_VIDEO_SOURCES.happy_bounce2,
-    setupPlayer,
-  );
   const victory_spin = useVideoPlayer(
     PET_VIDEO_SOURCES.victory_spin,
     setupPlayer,
@@ -48,7 +44,6 @@ export function usePetVideoPlayers(): PetVideoPlayerPool {
       sleeping,
       victory_spin,
       happy_bounce,
-      happy_bounce2,
       catches_a_coin,
     }),
     [
@@ -60,7 +55,6 @@ export function usePetVideoPlayers(): PetVideoPlayerPool {
       sleeping,
       victory_spin,
       happy_bounce,
-      happy_bounce2,
       catches_a_coin,
     ],
   );

@@ -1,6 +1,7 @@
 import { PetAvatar } from "@/components/pet/PetAvatar";
-import { ANIMATION_LABELS, GameColors } from "@/constants/game";
-import type { PetAnimationState, PetStats } from "@/types/game";
+import { GameColors } from "@/constants/game";
+import type { PetPlaybackState } from "@/hooks/use-pet-playback";
+import type { PetStats } from "@/types/game";
 import { moderateScale } from "@/utils/scale";
 import { useCallback, useState } from "react";
 import { type LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
@@ -11,10 +12,12 @@ const COMPACT_PET_MAX = 280;
 type PetStageProps = {
   name: string;
   stats: PetStats;
-  mood: PetAnimationState;
+  moodLabel: string;
+  playback: PetPlaybackState;
   compact?: boolean;
   onPetPress?: () => void;
   onAnimationComplete?: () => void;
+  onStepComplete?: (stepIndex: number) => void;
 };
 
 function StatBar({
@@ -54,10 +57,12 @@ function StatBar({
 export function PetStage({
   name,
   stats,
-  mood,
+  moodLabel,
+  playback,
   compact = false,
   onPetPress,
   onAnimationComplete,
+  onStepComplete,
 }: PetStageProps) {
   const [avatarWidth, setAvatarWidth] = useState(
     moderateScale(compact ? 220 : 200),
@@ -91,7 +96,7 @@ export function PetStage({
       </View>
 
       <Text style={[styles.moodLabel, compact && styles.moodLabelCompact]}>
-        {ANIMATION_LABELS[mood]}
+        {moodLabel}
       </Text>
 
       <View
@@ -99,10 +104,11 @@ export function PetStage({
         onLayout={handleAvatarLayout}
       >
         <PetAvatar
-          mood={mood}
+          playback={playback}
           width={avatarWidth}
           onPress={onPetPress}
           onAnimationComplete={onAnimationComplete}
+          onStepComplete={onStepComplete}
         />
       </View>
 

@@ -4,13 +4,13 @@ import {
   FEED_COST,
   FEED_HUNGER_RESTORE,
   GameColors,
-  ONE_SHOT_ANIMATIONS,
   PET_HAPPINESS_BOOST,
 } from "@/constants/game";
 import { pickRandomExcitedMood } from "@/constants/pet-videos";
 import { useGame } from "@/contexts/GameProvider";
-import { usePetMood } from "@/hooks/use-pet-mood";
-import type { PetAnimationState } from "@/types/game";
+import { usePetPlayback } from "@/hooks/use-pet-playback";
+import { shouldPetSleep } from "@/hooks/use-pet-mood";
+import type { PetStats } from "@/types/game";
 import { clampStat, withPetCareUpdate } from "@/utils/pet-care";
 import { moderateScale } from "@/utils/scale";
 import * as Haptics from "expo-haptics";
@@ -42,63 +42,98 @@ export default function HomeScreen() {
     progress,
     setPet,
     setWallet,
+    recordInteraction,
   } = useGame();
-  const [actionMood, setActionMood] = useState<PetAnimationState | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const baseMood = usePetMood(pet);
-  const displayMood = actionMood ?? baseMood;
+  const {
+    playback,
+    displayLabel,
+    baseVideoMood,
+    playAction,
+    handleSegmentComplete,
+  } = usePetPlayback(pet);
 
   const showMessage = useCallback((text: string) => {
     setMessage(text);
     setTimeout(() => setMessage(null), 2500);
   }, []);
 
-  const playActionMood = useCallback((mood: PetAnimationState) => {
-    triggerHaptic();
-    setActionMood(mood);
-  }, []);
+  const playActionMood = useCallback(
+    (wasAsleep: boolean, mood: Parameters<typeof playAction>[1]) => {
+      triggerHaptic();
+      playAction(wasAsleep, mood);
+    },
+    [playAction],
+  );
+
+  const wakePet = useCallback(
+    (updateStats: (stats: PetStats) => PetStats) => {
+      const now = Date.now();
+      setPet((current) => ({
+        ...withPetCareUpdate(current, updateStats),
+        isAsleep: false,
+        lastInteractionAt: now,
+      }));
+    },
+    [setPet],
+  );
 
   const handlePetTap = useCallback(() => {
-    playActionMood(pickRandomExcitedMood());
-    setPet((current) =>
-      withPetCareUpdate(current, (stats) => ({
-        ...stats,
-        happiness: clampStat(stats.happiness + PET_HAPPINESS_BOOST),
-      })),
-    );
-  }, [playActionMood, setPet]);
+    recordInteraction();
+    const wasAsleep = pet.isAsleep === true;
+    playActionMood(wasAsleep, pickRandomExcitedMood());
+    wakePet((stats) => ({
+      ...stats,
+      happiness: clampStat(stats.happiness + PET_HAPPINESS_BOOST),
+    }));
+  }, [pet.isAsleep, playActionMood, recordInteraction, wakePet]);
 
   const handleFeed = useCallback(() => {
+    recordInteraction();
     if (wallet.coins < FEED_COST) {
       triggerHaptic();
       showMessage(`Need ${FEED_COST} coins to feed ${pet.name}!`);
       return;
     }
 
+    const wasAsleep = pet.isAsleep === true;
     triggerHaptic();
     setWallet((current) => ({ coins: current.coins - FEED_COST }));
-    setPet((current) =>
-      withPetCareUpdate(current, (stats) => ({
-        ...stats,
-        hunger: clampStat(stats.hunger + FEED_HUNGER_RESTORE),
-        happiness: clampStat(stats.happiness + 5),
-      })),
-    );
-    setActionMood("eating");
+    wakePet((stats) => ({
+      ...stats,
+      hunger: clampStat(stats.hunger + FEED_HUNGER_RESTORE),
+      happiness: clampStat(stats.happiness + 5),
+    }));
+    playActionMood(wasAsleep, "eating");
     showMessage(`${pet.name} enjoyed the snack!`);
-  }, [pet.name, setPet, setWallet, showMessage, wallet.coins]);
+  }, [
+    pet.isAsleep,
+    pet.name,
+    playActionMood,
+    recordInteraction,
+    setWallet,
+    showMessage,
+    wakePet,
+    wallet.coins,
+  ]);
 
   const handlePlayPuzzle = useCallback(() => {
+    recordInteraction();
     triggerHaptic();
     router.push("/puzzles");
-  }, [router]);
+  }, [recordInteraction, router]);
 
   const handleAnimationComplete = useCallback(() => {
-    setActionMood((current) =>
-      current && ONE_SHOT_ANIMATIONS.includes(current) ? null : current,
-    );
-  }, []);
+    const completedMood =
+      playback.kind === "segment" ? playback.mood : baseVideoMood;
+    handleSegmentComplete(completedMood);
+    if (completedMood === "fallingAsleep") {
+      setPet((current) =>
+        shouldPetSleep(current) ? { ...current, isAsleep: true } : current,
+      );
+    }
+  }, [baseVideoMood, handleSegmentComplete, playback, setPet]);
 
   if (!isReady) {
     return (
@@ -134,7 +169,8 @@ export default function HomeScreen() {
             compact
             name={pet.name}
             stats={pet.stats}
-            mood={displayMood}
+            moodLabel={displayLabel}
+            playback={playback}
             onPetPress={handlePetTap}
             onAnimationComplete={handleAnimationComplete}
           />

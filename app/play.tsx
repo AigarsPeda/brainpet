@@ -21,12 +21,8 @@ import {
 import { useGame } from "@/contexts/GameProvider";
 import type { PetAnimationState } from "@/types/game";
 import type { PuzzleDifficulty } from "@/types/puzzle";
+import { applyLifeRegen, canSpendLife, loseLife } from "@/utils/lives";
 import { clampStat, withPetCareUpdate } from "@/utils/pet-care";
-import {
-  applyLifeRegen,
-  canSpendLife,
-  loseLife,
-} from "@/utils/lives";
 import { moderateScale } from "@/utils/scale";
 import * as Haptics from "expo-haptics";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
@@ -69,17 +65,20 @@ export default function PlayScreen() {
     : "easy";
   const rawIndex = Array.isArray(indexParam) ? indexParam[0] : indexParam;
   const parsedIndex =
-    rawIndex !== undefined && rawIndex !== "" ? Number.parseInt(rawIndex, 10) : NaN;
+    rawIndex !== undefined && rawIndex !== ""
+      ? Number.parseInt(rawIndex, 10)
+      : NaN;
   const {
-    isReady,
-    hasCompletedOnboarding,
     pet,
-    wallet,
-    progress,
     setPet,
+    wallet,
+    isReady,
+    buyLife,
+    progress,
     setWallet,
     setProgress,
-    buyLife,
+    hasCompletedOnboarding,
+    recordInteraction,
   } = useGame();
 
   const puzzles = PUZZLES_BY_DIFFICULTY[difficulty];
@@ -118,6 +117,7 @@ export default function PlayScreen() {
   }, [difficulty, sessionIndex]);
 
   const exitToPath = useCallback(() => {
+    recordInteraction();
     if (router.canGoBack()) {
       router.back();
       return;
@@ -126,11 +126,12 @@ export default function PlayScreen() {
       pathname: "/puzzles",
       params: { difficulty },
     });
-  }, [difficulty, router]);
+  }, [difficulty, recordInteraction, router]);
 
   const handleChoice = useCallback(
     (index: number) => {
       if (answered) return;
+      recordInteraction();
 
       const correct = index === puzzle.correctIndex;
       setSelectedIndex(index);
@@ -169,6 +170,7 @@ export default function PlayScreen() {
       coinReward,
       happinessBoost,
       puzzle.correctIndex,
+      recordInteraction,
       setPet,
       setProgress,
       setWallet,
@@ -176,6 +178,7 @@ export default function PlayScreen() {
   );
 
   const handleContinue = useCallback(() => {
+    recordInteraction();
     if (isCorrect && isReplay) {
       exitToPath();
       return;
@@ -217,6 +220,7 @@ export default function PlayScreen() {
     isReplay,
     progress.lives,
     puzzles.length,
+    recordInteraction,
     router,
     sessionIndex,
     setProgress,
@@ -236,7 +240,7 @@ export default function PlayScreen() {
       exitToPath();
       return;
     }
-    router.replace('/');
+    router.replace("/");
   }, [
     difficulty,
     exitToPath,
@@ -261,19 +265,11 @@ export default function PlayScreen() {
   }
 
   if (sessionIndex < 0 || sessionIndex >= puzzles.length) {
-    return (
-      <Redirect
-        href={{ pathname: "/puzzles", params: { difficulty } }}
-      />
-    );
+    return <Redirect href={{ pathname: "/puzzles", params: { difficulty } }} />;
   }
 
   if (!canPlayPuzzleIndex(sessionIndex, savedIndex)) {
-    return (
-      <Redirect
-        href={{ pathname: "/puzzles", params: { difficulty } }}
-      />
-    );
+    return <Redirect href={{ pathname: "/puzzles", params: { difficulty } }} />;
   }
 
   if (!hasLives) {
@@ -321,7 +317,9 @@ export default function PlayScreen() {
             accessibilityLabel="Go back"
             accessibilityState={{ disabled: answered }}
           >
-            <Text style={[styles.backText, answered && styles.backTextDisabled]}>
+            <Text
+              style={[styles.backText, answered && styles.backTextDisabled]}
+            >
               ← Back
             </Text>
           </Pressable>
@@ -376,7 +374,13 @@ export default function PlayScreen() {
           visible={answered}
           correct={isCorrect}
           petMood={resultMood}
-          message={isCorrect ? (isReplay ? "Cracked it again!" : "Great job!") : "Good try!"}
+          message={
+            isCorrect
+              ? isReplay
+                ? "Cracked it again!"
+                : "Great job!"
+              : "Good try!"
+          }
           detail={isCorrect ? puzzle.explanation : puzzle.hint}
           coinsEarned={coinsEarned}
           coinType={isReplay ? "sparkle" : "regular"}

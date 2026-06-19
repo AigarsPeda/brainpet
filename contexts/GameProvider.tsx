@@ -15,6 +15,7 @@ import type { PetProfile, Progress, Wallet } from '@/types/game';
 import type { GameSave } from '@/types/save';
 import { PET_NAME_MAX_LENGTH } from '@/types/save';
 import { applyPetTimeDecay } from '@/utils/pet-care';
+import { resolveAsleepOnLoad } from '@/hooks/use-pet-mood';
 import {
   applyLifeRegen,
   buyOneLife,
@@ -39,6 +40,7 @@ type GameContextValue = {
   setProgress: (updater: (current: Progress) => Progress) => void;
   buyLife: () => boolean;
   completeOnboarding: (name: string) => Promise<boolean>;
+  recordInteraction: () => void;
 };
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -58,7 +60,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     loadGameSave()
       .then((loaded) => {
         if (!active) return;
-        setSave(loaded ?? createDefaultGameSave());
+        setSave(loaded?.save ?? createDefaultGameSave());
         setIsReady(true);
       })
       .catch(() => {
@@ -84,15 +86,22 @@ export function GameProvider({ children }: { children: ReactNode }) {
     });
   }, [isReady, save]);
 
-  const tickGameTime = useCallback(() => {
-    setSave((current) => ({
-      ...current,
-      pet: applyPetTimeDecay(current.pet),
-      progress: {
-        ...current.progress,
-        lives: applyLifeRegen(current.progress.lives),
-      },
-    }));
+  const tickGameTime = useCallback((resolveSleep = false) => {
+    const now = Date.now();
+    setSave((current) => {
+      const awayMs = Math.max(0, now - current.pet.lastCareAt);
+      const decayedPet = applyPetTimeDecay(current.pet, now);
+      return {
+        ...current,
+        pet: resolveSleep
+          ? resolveAsleepOnLoad(decayedPet, awayMs, now)
+          : decayedPet,
+        progress: {
+          ...current.progress,
+          lives: applyLifeRegen(current.progress.lives, now),
+        },
+      };
+    });
   }, []);
 
   useEffect(() => {
@@ -100,12 +109,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     const handleAppState = (state: AppStateStatus) => {
       if (state === 'active') {
-        tickGameTime();
+        tickGameTime(true);
       }
     };
 
     const subscription = AppState.addEventListener('change', handleAppState);
-    const interval = setInterval(tickGameTime, CARE_TICK_MS);
+    const interval = setInterval(() => tickGameTime(false), CARE_TICK_MS);
 
     return () => {
       subscription.remove();
@@ -126,6 +135,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const setProgress = useCallback((updater: (current: Progress) => Progress) => {
     setSave((current) => ({ ...current, progress: updater(current.progress) }));
+  }, []);
+
+  const recordInteraction = useCallback(() => {
+    const now = Date.now();
+    setSave((current) => ({
+      ...current,
+      pet: { ...current.pet, lastInteractionAt: now },
+    }));
   }, []);
 
   const buyLife = useCallback(() => {
@@ -182,10 +199,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setProgress,
       buyLife,
       completeOnboarding,
+      recordInteraction,
     }),
     [
       completeOnboarding,
       isReady,
+      recordInteraction,
       save.hasCompletedOnboarding,
       save.pet,
       save.progress,

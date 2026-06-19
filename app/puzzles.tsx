@@ -46,7 +46,7 @@ export default function PuzzlesScreen() {
     ? rawDifficulty
     : null;
 
-  const { isReady, hasCompletedOnboarding, pet, wallet, progress, buyLife } =
+  const { isReady, hasCompletedOnboarding, pet, wallet, progress, buyLife, recordInteraction } =
     useGame();
   const [difficulty, setDifficulty] = useState<PuzzleDifficulty>(
     paramDifficulty ?? 'easy',
@@ -76,14 +76,16 @@ export default function PuzzlesScreen() {
   }, []);
 
   const handleSelectDifficulty = useCallback((next: PuzzleDifficulty) => {
+    recordInteraction();
     triggerHaptic();
     setDifficulty(next);
-  }, []);
+  }, [recordInteraction]);
 
   const handlePlayPuzzle = useCallback(
     (index: number, isReplay: boolean) => {
       if (!canSpendLife(progress.lives)) return;
       if (!canPlayPuzzleIndex(index, solvedCount)) return;
+      recordInteraction();
       triggerHaptic();
       router.push({
         pathname: '/play',
@@ -94,17 +96,18 @@ export default function PuzzlesScreen() {
         },
       });
     },
-    [difficulty, progress.lives, router, solvedCount],
+    [difficulty, progress.lives, recordInteraction, router, solvedCount],
   );
 
   const handleBackHome = useCallback(() => {
+    recordInteraction();
     triggerHaptic();
     if (router.canGoBack()) {
       router.back();
       return;
     }
     router.replace('/');
-  }, [router]);
+  }, [recordInteraction, router]);
 
   const handlePlayCurrent = useCallback(() => {
     if (solvedCount >= puzzles.length) return;

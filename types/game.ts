@@ -1,11 +1,11 @@
 export type PetMood =
   | 'idle'
   | 'excited'
-  | 'excited2'
   | 'dancing'
   | 'eating'
   | 'angry'
   | 'sad'
+  | 'fallingAsleep'
   | 'sleeping';
 
 /** Short puzzle / reward clips — not derived from pet stats. */
@@ -27,6 +27,10 @@ export type PetProfile = {
   stats: PetStats;
   /** Unix ms — anchor for hunger/happiness decay between sessions. */
   lastCareAt: number;
+  /** Unix ms — last tap anywhere in the app; used for idle sleep. */
+  lastInteractionAt?: number;
+  /** Persisted asleep loop — cleared when the player feeds or pets. */
+  isAsleep?: boolean;
 };
 
 export type Wallet = {

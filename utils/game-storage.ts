@@ -10,6 +10,7 @@ import {
   type GameSave,
 } from "@/types/save";
 import { applyPetTimeDecay } from "@/utils/pet-care";
+import { resolveAsleepOnLoad } from "@/hooks/use-pet-mood";
 import { applyLifeRegen, createDefaultLives } from "@/utils/lives";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -59,6 +60,13 @@ function normalizePetProfile(pet: Record<string, unknown>): PetProfile {
     },
     lastCareAt:
       typeof pet.lastCareAt === 'number' ? pet.lastCareAt : Date.now(),
+    lastInteractionAt:
+      typeof pet.lastInteractionAt === 'number'
+        ? pet.lastInteractionAt
+        : typeof pet.lastCareAt === 'number'
+          ? pet.lastCareAt
+          : Date.now(),
+    isAsleep: pet.isAsleep === true,
   };
 }
 
@@ -81,7 +89,7 @@ function normalizeLives(value: unknown): LivesState {
   );
 }
 
-function parseGameSave(raw: string): GameSave | null {
+function parseGameSave(raw: string): { save: GameSave; awayMsAtSessionStart: number } | null {
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!isRecord(parsed)) return null;
@@ -98,23 +106,39 @@ function parseGameSave(raw: string): GameSave | null {
 
     const puzzlesSolved = normalizePuzzleProgress(parsed.progress.puzzlesSolved);
     const lives = normalizeLives(parsed.progress.lives);
-    const pet = applyPetTimeDecay(normalizePetProfile(parsed.pet));
+    const rawLastCareAt =
+      isRecord(parsed.pet) && typeof parsed.pet.lastCareAt === 'number'
+        ? parsed.pet.lastCareAt
+        : Date.now();
+    const awayMs = Math.max(0, Date.now() - rawLastCareAt);
+    const pet = resolveAsleepOnLoad(
+      applyPetTimeDecay(normalizePetProfile(parsed.pet), Date.now()),
+      awayMs,
+    );
 
     return {
-      ...(parsed as GameSave),
-      pet,
-      progress: {
-        ...(parsed.progress as Progress),
-        puzzlesSolved,
-        lives,
+      save: {
+        ...(parsed as GameSave),
+        pet,
+        progress: {
+          ...(parsed.progress as Progress),
+          puzzlesSolved,
+          lives,
+        },
       },
+      awayMsAtSessionStart: awayMs,
     };
   } catch {
     return null;
   }
 }
 
-export async function loadGameSave(): Promise<GameSave | null> {
+export type LoadedGameSave = {
+  save: GameSave;
+  awayMsAtSessionStart: number;
+};
+
+export async function loadGameSave(): Promise<LoadedGameSave | null> {
   const raw = await AsyncStorage.getItem(GAME_SAVE_STORAGE_KEY);
   if (!raw) return null;
   return parseGameSave(raw);

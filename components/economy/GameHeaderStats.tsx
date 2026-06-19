@@ -23,15 +23,17 @@ function triggerHaptic(
 }
 
 export function GameHeaderStats({ coins, streak = 0, lives }: GameHeaderStatsProps) {
-  const { buyLife } = useGame();
+  const { buyLife, recordInteraction } = useGame();
   const [showBuySheet, setShowBuySheet] = useState(false);
 
   const handleOpenBuySheet = useCallback(() => {
+    recordInteraction();
     triggerHaptic();
     setShowBuySheet(true);
-  }, []);
+  }, [recordInteraction]);
 
   const handleBuyLife = useCallback(() => {
+    recordInteraction();
     const purchased = buyLife();
     if (purchased) {
       triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);

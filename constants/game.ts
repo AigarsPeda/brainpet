@@ -30,6 +30,8 @@ export const DEFAULT_PET = {
     level: 1,
   },
   lastCareAt: Date.now(),
+  lastInteractionAt: Date.now(),
+  isAsleep: false,
 };
 
 export const DEFAULT_WALLET = { coins: 42 };
@@ -84,31 +86,44 @@ export function getPuzzleCoinReward(
 }
 
 export type MoodAnimationConfig = {
-  frameMs: number;
   loop: boolean;
-  /** Full 4-frame cycles before one-shot moods finish. Ignored when loop is true. */
-  cycles?: number;
+  /** Video clip in-point (ms). */
+  startMs?: number;
+  /** Video clip out-point (ms) — segment end for loop or one-shot. */
+  endMs?: number;
+  /** Skip intro mood and jump to loop after this much time away (sleeping only). */
+  skipIntroAfterAwayMs?: number;
+  /** Fall asleep after this long without a tap while the app is open. */
+  idleAsleepMs?: number;
 };
 
 export const MOOD_ANIMATION: Record<PetMood, MoodAnimationConfig> = {
-  idle: { frameMs: 400, loop: true },
-  excited: { frameMs: 200, loop: false, cycles: 2 },
-  excited2: { frameMs: 200, loop: false, cycles: 2 },
-  dancing: { frameMs: 150, loop: false, cycles: 3 },
-  eating: { frameMs: 300, loop: false, cycles: 1 },
-  angry: { frameMs: 400, loop: true },
-  sad: { frameMs: 500, loop: true },
-  sleeping: { frameMs: 600, loop: true },
+  idle: { loop: true },
+  excited: { loop: false, startMs: 5500 },
+  dancing: { loop: false, startMs: 5000 },
+  eating: { loop: false, startMs: 5000 },
+  angry: { loop: true, startMs: 5000 },
+  sad: { loop: true, startMs: 5000 },
+  /** sleeping.mp4 lie-down intro. */
+  fallingAsleep: { loop: false, startMs: 0, endMs: 7550 },
+  /** sleeping.mp4 breathing loop. */
+  sleeping: {
+    loop: true,
+    startMs: 7750,
+    endMs: 9000,
+    skipIntroAfterAwayMs: 30 * 60 * 1000,
+    idleAsleepMs: 30 * 60 * 1000,
+  },
 };
 
 export const MOOD_LABELS: Record<PetMood, string> = {
   idle: "Feeling good",
   excited: "So happy!",
-  excited2: "So happy!",
   dancing: "Party time!",
   eating: "Yum yum!",
   angry: "Missed you!",
   sad: "Needs attention",
+  fallingAsleep: "Getting sleepy…",
   sleeping: "Zzz…",
 };
 
@@ -121,7 +136,6 @@ export const ANIMATION_LABELS: Record<PetAnimationState, string> = {
 /** One-shot clips that return to the base mood when finished. */
 export const ONE_SHOT_ANIMATIONS: PetAnimationState[] = [
   "excited",
-  "excited2",
   "eating",
   "dancing",
   "correct",
