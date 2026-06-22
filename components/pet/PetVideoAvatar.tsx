@@ -14,6 +14,7 @@ const DEFAULT_SIZE = 200;
 const SEGMENT_POLL_MS = 80;
 const REVERSE_POLL_MS = 33;
 const REVERSE_STEP_SEC = REVERSE_POLL_MS / 1000;
+const SEEK_EPSILON_SEC = 0.04;
 
 type PetVideoAvatarProps = {
   segment?: PetVideoSegment;
@@ -25,8 +26,18 @@ type PetVideoAvatarProps = {
   onPress?: () => void;
 };
 
-function segmentKey(segment: PetVideoSegment, index: number) {
-  return `${segment.videoKey}:${segment.startMs ?? 0}:${segment.endMs ?? 'end'}:${segment.reverse ? 'rev' : 'fwd'}:${index}`;
+type LayerStack = {
+  under: PetVideoKey | null;
+  top: PetVideoKey;
+};
+
+function segmentToken(steps: PetVideoSegment[]) {
+  return steps
+    .map(
+      (step, index) =>
+        `${step.videoKey}:${step.startMs ?? 0}:${step.endMs ?? 'end'}:${step.reverse ? 'rev' : 'fwd'}:${step.loop ? 'loop' : 'once'}:${index}`,
+    )
+    .join('|');
 }
 
 export function PetVideoAvatar({
@@ -45,14 +56,28 @@ export function PetVideoAvatar({
   const applySegmentRef = useRef<
     (config: PetVideoSegment, stepIndex: number) => void
   >(() => {});
-  const activeKeyRef = useRef<PetVideoKey>(
-    scenarioSteps?.[0]?.videoKey ?? segment?.videoKey ?? 'idle',
-  );
-  const [activeKey, setActiveKey] = useState<PetVideoKey>(activeKeyRef.current);
-  const readyRef = useRef(false);
+
+  const initialKey =
+    scenarioSteps?.[0]?.videoKey ?? segment?.videoKey ?? 'idle';
+  const activeKeyRef = useRef<PetVideoKey>(initialKey);
+  const [layers, setLayers] = useState<LayerStack>({
+    under: null,
+    top: initialKey,
+  });
+  const [topVisible, setTopVisible] = useState(true);
+
   const segmentTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const stepIndexRef = useRef(0);
   const stepsRef = useRef<PetVideoSegment[]>([]);
+  const playbackTokenRef = useRef('');
+  const pendingRevealRef = useRef<{
+    topKey: PetVideoKey;
+    underKey: PetVideoKey | null;
+    stepIndex: number;
+    config: PetVideoSegment;
+  } | null>(null);
+  const revealFallbackRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearUnderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     onCompleteRef.current = onAnimationComplete;
@@ -73,22 +98,32 @@ export function PetVideoAvatar({
     }
   }, []);
 
-  const revealSubRef = useRef<{ remove: () => void } | null>(null);
+  const clearRevealFallback = useCallback(() => {
+    if (revealFallbackRef.current) {
+      clearTimeout(revealFallbackRef.current);
+      revealFallbackRef.current = null;
+    }
+  }, []);
 
-  const revealLayer = useCallback(
-    (nextKey: PetVideoKey, prevKey: PetVideoKey) => {
-      if (prevKey !== nextKey) {
-        players[prevKey].pause();
-      }
-      activeKeyRef.current = nextKey;
-      setActiveKey(nextKey);
-    },
-    [players],
-  );
+  const clearUnderTimer = useCallback(() => {
+    if (clearUnderTimerRef.current) {
+      clearTimeout(clearUnderTimerRef.current);
+      clearUnderTimerRef.current = null;
+    }
+  }, []);
 
   const shouldLoop = useCallback((config: PetVideoSegment) => {
     return loopRef.current || config.loop === true;
   }, []);
+
+  const seekIfNeeded = useCallback(
+    (player: (typeof players)[PetVideoKey], targetSec: number) => {
+      if (Math.abs(player.currentTime - targetSec) > SEEK_EPSILON_SEC) {
+        player.currentTime = targetSec;
+      }
+    },
+    [],
+  );
 
   const finishStep = useCallback((stepIndex: number) => {
     queueMicrotask(() => onStepCompleteRef.current?.(stepIndex));
@@ -103,6 +138,22 @@ export function PetVideoAvatar({
 
     queueMicrotask(() => onCompleteRef.current?.());
   }, []);
+
+  const commitReveal = useCallback(
+    (topKey: PetVideoKey, underKey: PetVideoKey | null) => {
+      activeKeyRef.current = topKey;
+      if (underKey) {
+        players[underKey].pause();
+      }
+      clearUnderTimer();
+      clearUnderTimerRef.current = setTimeout(() => {
+        setLayers((current) =>
+          current.top === topKey ? { under: null, top: topKey } : current,
+        );
+      }, 100);
+    },
+    [clearUnderTimer, players],
+  );
 
   const watchSegmentEndForward = useCallback(
     (
@@ -122,7 +173,7 @@ export function PetVideoAvatar({
         if (player.currentTime < endSec - 0.05) return;
 
         if (looping) {
-          player.currentTime = startSec;
+          seekIfNeeded(player, startSec);
           player.play();
           return;
         }
@@ -133,7 +184,7 @@ export function PetVideoAvatar({
         finishStep(stepIndex);
       }, SEGMENT_POLL_MS);
     },
-    [clearSegmentTimer, finishStep, shouldLoop],
+    [clearSegmentTimer, finishStep, seekIfNeeded, shouldLoop],
   );
 
   const watchSegmentEndReverse = useCallback(
@@ -186,15 +237,40 @@ export function PetVideoAvatar({
     [watchSegmentEndForward, watchSegmentEndReverse],
   );
 
+  const handleFirstFrame = useCallback(
+    (key: PetVideoKey) => {
+      const pending = pendingRevealRef.current;
+      if (!pending || pending.topKey !== key) return;
+
+      pendingRevealRef.current = null;
+      clearRevealFallback();
+      setTopVisible(true);
+      watchSegmentEnd(players[key], pending.config, pending.stepIndex);
+      commitReveal(key, pending.underKey);
+    },
+    [clearRevealFallback, commitReveal, players, watchSegmentEnd],
+  );
+
+  const queueRevealFallback = useCallback(
+    (topKey: PetVideoKey) => {
+      clearRevealFallback();
+      revealFallbackRef.current = setTimeout(() => {
+        handleFirstFrame(topKey);
+      }, 350);
+    },
+    [clearRevealFallback, handleFirstFrame],
+  );
+
   const applySegment = useCallback(
     (config: PetVideoSegment, stepIndex: number) => {
       const nextKey = config.videoKey;
       const nextPlayer = players[nextKey];
       const prevKey = activeKeyRef.current;
 
-      revealSubRef.current?.remove();
-      revealSubRef.current = null;
       clearSegmentTimer();
+      clearUnderTimer();
+      clearRevealFallback();
+      pendingRevealRef.current = null;
 
       const startSec = (config.startMs ?? 0) / 1000;
       const endSec =
@@ -210,43 +286,61 @@ export function PetVideoAvatar({
       nextPlayer.loop = nativeLoop;
 
       if (config.reverse && endSec !== undefined) {
+        setLayers({ under: null, top: nextKey });
+        setTopVisible(true);
         nextPlayer.currentTime = endSec;
         watchSegmentEnd(nextPlayer, config, stepIndex);
-        revealLayer(nextKey, prevKey);
+        activeKeyRef.current = nextKey;
         return;
       }
 
-      nextPlayer.currentTime = startSec;
-      nextPlayer.play();
-      watchSegmentEnd(nextPlayer, config, stepIndex);
+      const startPlayback = () => {
+        seekIfNeeded(nextPlayer, startSec);
+        nextPlayer.play();
+      };
 
       if (nextKey === prevKey) {
-        revealLayer(nextKey, prevKey);
+        setLayers({ under: null, top: nextKey });
+        setTopVisible(true);
+        startPlayback();
+        watchSegmentEnd(nextPlayer, config, stepIndex);
+        activeKeyRef.current = nextKey;
         return;
       }
 
-      revealSubRef.current = nextPlayer.addListener(
-        'playingChange',
-        ({ isPlaying }) => {
-          if (!isPlaying) return;
-          revealSubRef.current?.remove();
-          revealSubRef.current = null;
-          revealLayer(nextKey, prevKey);
-        },
-      );
+      setLayers({ under: prevKey, top: nextKey });
+      setTopVisible(false);
+      pendingRevealRef.current = {
+        topKey: nextKey,
+        underKey: prevKey,
+        stepIndex,
+        config,
+      };
+      startPlayback();
+      queueRevealFallback(nextKey);
     },
-    [clearSegmentTimer, players, revealLayer, shouldLoop, watchSegmentEnd],
+    [
+      clearRevealFallback,
+      clearSegmentTimer,
+      clearUnderTimer,
+      players,
+      queueRevealFallback,
+      seekIfNeeded,
+      shouldLoop,
+      watchSegmentEnd,
+    ],
   );
 
   applySegmentRef.current = applySegment;
 
   useEffect(() => {
     const steps = scenarioSteps ?? (segment ? [segment] : []);
-    if (!readyRef.current) {
-      readyRef.current = true;
-    }
-    if (steps.length === 0) return;
+    const token = segmentToken(steps);
 
+    if (steps.length === 0) return;
+    if (token === playbackTokenRef.current) return;
+
+    playbackTokenRef.current = token;
     stepsRef.current = steps;
     stepIndexRef.current = 0;
     applySegment(steps[0], 0);
@@ -265,7 +359,7 @@ export function PetVideoAvatar({
         const startSec = (config.startMs ?? 0) / 1000;
 
         if (shouldLoop(config)) {
-          players[key].currentTime = startSec;
+          seekIfNeeded(players[key], startSec);
           players[key].play();
           return;
         }
@@ -277,25 +371,56 @@ export function PetVideoAvatar({
     );
 
     return () => {
-      revealSubRef.current?.remove();
-      revealSubRef.current = null;
       clearSegmentTimer();
+      clearUnderTimer();
+      clearRevealFallback();
       subscriptions.forEach((sub) => sub.remove());
     };
-  }, [clearSegmentTimer, finishStep, players, shouldLoop]);
+  }, [
+    clearRevealFallback,
+    clearSegmentTimer,
+    clearUnderTimer,
+    finishStep,
+    players,
+    seekIfNeeded,
+    shouldLoop,
+  ]);
+
+  const mountedKeys = Array.from(
+    new Set(
+      [layers.under, layers.top].filter(
+        (key): key is PetVideoKey => key !== null,
+      ),
+    ),
+  );
 
   const content = (
     <View style={[styles.container, { width: size, height: size }]}>
-      {PET_VIDEO_KEYS.map((key) => (
-        <VideoView
-          key={key}
-          player={players[key]}
-          style={[styles.videoLayer, { opacity: activeKey === key ? 1 : 0 }]}
-          contentFit="contain"
-          nativeControls={false}
-          {...(Platform.OS === 'android' ? { surfaceType: 'textureView' } : {})}
-        />
-      ))}
+      {mountedKeys.map((key) => {
+        const isTop = key === layers.top;
+        return (
+          <VideoView
+            key={key}
+            player={players[key]}
+            style={[
+              styles.videoLayer,
+              {
+                zIndex: isTop ? 2 : 1,
+                opacity: isTop ? (topVisible ? 1 : 0) : 1,
+              },
+            ]}
+            contentFit="contain"
+            nativeControls={false}
+            useExoShutter={false}
+            onFirstFrameRender={
+              isTop ? () => handleFirstFrame(key) : undefined
+            }
+            {...(Platform.OS === 'android'
+              ? { surfaceType: 'textureView' as const }
+              : {})}
+          />
+        );
+      })}
     </View>
   );
 

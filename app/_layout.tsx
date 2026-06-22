@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { GameProvider } from '@/contexts/GameProvider';
+import { PetVideoProvider } from '@/contexts/PetVideoProvider';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function RootLayout() {
@@ -11,7 +12,8 @@ export default function RootLayout() {
 
   return (
     <GameProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <PetVideoProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack
           screenOptions={{
             headerShown: false,
@@ -33,7 +35,8 @@ export default function RootLayout() {
           />
         </Stack>
         <StatusBar style="auto" />
-      </ThemeProvider>
+        </ThemeProvider>
+      </PetVideoProvider>
     </GameProvider>
   );
 }
