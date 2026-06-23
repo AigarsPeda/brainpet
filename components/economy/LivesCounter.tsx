@@ -7,6 +7,7 @@ import {
 } from '@/utils/lives';
 import { moderateScale } from '@/utils/scale';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 function useRegenNow() {
@@ -27,6 +28,7 @@ type LivesCounterProps = {
 };
 
 export function LivesCounter({ lives, compact = false, onPress }: LivesCounterProps) {
+  const { t } = useTranslation();
   const now = useRegenNow();
 
   const synced = applyLifeRegen(lives, now);
@@ -36,7 +38,7 @@ export function LivesCounter({ lives, compact = false, onPress }: LivesCounterPr
     <>
       <Text style={styles.emoji}>❤️</Text>
       <Text style={styles.value}>
-        {synced.current}/{MAX_LIVES}
+        {t('lives.count', { current: synced.current, max: MAX_LIVES })}
       </Text>
       {regenMs !== null && synced.current < MAX_LIVES ? (
         <LifeRegenClock regenMs={regenMs} compact={compact} />
@@ -54,7 +56,10 @@ export function LivesCounter({ lives, compact = false, onPress }: LivesCounterPr
           pressed && styles.pillPressed,
         ]}
         accessibilityRole="button"
-        accessibilityLabel={`Lives ${synced.current} of ${MAX_LIVES}. Tap to buy more.`}
+        accessibilityLabel={t('lives.a11yLives', {
+          current: synced.current,
+          max: MAX_LIVES,
+        })}
       >
         {content}
       </Pressable>
@@ -79,6 +84,7 @@ export function NoLivesPanel({
   onBuyLife,
   onBack,
 }: NoLivesPanelProps) {
+  const { t } = useTranslation();
   const now = useRegenNow();
 
   const synced = applyLifeRegen(lives, now);
@@ -88,14 +94,14 @@ export function NoLivesPanel({
   return (
     <View style={styles.panel}>
       <Text style={styles.panelEmoji}>💔</Text>
-      <Text style={styles.panelTitle}>Out of lives</Text>
+      <Text style={styles.panelTitle}>{t('lives.outOfLives')}</Text>
       {regenMs !== null ? (
         <View style={styles.panelClockWrap}>
-          <Text style={styles.panelClockLabel}>Next life in</Text>
+          <Text style={styles.panelClockLabel}>{t('lives.nextLifeIn')}</Text>
           <LifeRegenClock regenMs={regenMs} compact={false} showProgress />
         </View>
       ) : (
-        <Text style={styles.panelText}>Take a break and come back soon!</Text>
+        <Text style={styles.panelText}>{t('lives.takeBreak')}</Text>
       )}
 
       {canBuy ? (
@@ -103,17 +109,17 @@ export function NoLivesPanel({
           style={styles.buyBtn}
           onPress={onBuyLife}
           accessibilityRole="button"
-          accessibilityLabel={`Buy a life for ${LIFE_BUY_COST} coins`}
+          accessibilityLabel={t('lives.a11yBuy', { cost: LIFE_BUY_COST })}
         >
           <Text style={styles.buyBtnText}>
-            Buy a life · {LIFE_BUY_COST} 🪙
+            {t('lives.buyLife', { cost: LIFE_BUY_COST })}
           </Text>
         </Pressable>
       ) : (
         <Text style={styles.cantBuy}>
           {coins < LIFE_BUY_COST
-            ? `Need ${LIFE_BUY_COST} coins to buy a life`
-            : 'Lives full'}
+            ? t('lives.needCoinsShort', { cost: LIFE_BUY_COST })
+            : t('lives.livesFull')}
         </Text>
       )}
 
@@ -122,9 +128,9 @@ export function NoLivesPanel({
           style={styles.backBtn}
           onPress={onBack}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel={t('common.back')}
         >
-          <Text style={styles.backBtnText}>Back to puzzle path</Text>
+          <Text style={styles.backBtnText}>{t('lives.backToPath')}</Text>
         </Pressable>
       ) : null}
     </View>

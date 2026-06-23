@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { GameColors } from '@/constants/game';
 import { moderateScale } from '@/utils/scale';
@@ -9,6 +10,8 @@ type CoinCounterProps = {
 };
 
 export function CoinCounter({ coins, streak = 0 }: CoinCounterProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.row}>
       <View style={styles.pill}>
@@ -18,7 +21,9 @@ export function CoinCounter({ coins, streak = 0 }: CoinCounterProps) {
       {streak > 0 && (
         <View style={[styles.pill, styles.streakPill]}>
           <Text style={styles.streakEmoji}>🔥</Text>
-          <Text style={styles.streakValue}>{streak} day</Text>
+          <Text style={styles.streakValue}>
+            {t('economy.streakDay', { count: streak })}
+          </Text>
         </View>
       )}
     </View>

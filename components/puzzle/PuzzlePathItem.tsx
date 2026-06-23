@@ -1,8 +1,10 @@
 import { GameColors } from '@/constants/game';
 import type { PuzzlePathState } from '@/constants/puzzles';
+import { useTopicLabel } from '@/hooks/use-topic-label';
 import type { Puzzle } from '@/types/puzzle';
 import { moderateScale } from '@/utils/scale';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const TOPIC_EMOJI: Record<Puzzle['topic'], string> = {
   addition: '➕',
@@ -12,13 +14,11 @@ const TOPIC_EMOJI: Record<Puzzle['topic'], string> = {
   patterns: '🔢',
 };
 
-const TOPIC_LABEL: Record<Puzzle['topic'], string> = {
-  addition: 'Addition',
-  subtraction: 'Subtraction',
-  multiplication: 'Multiplication',
-  logic: 'Logic',
-  patterns: 'Patterns',
-};
+const STATE_LABEL_KEYS = {
+  completed: 'puzzlePath.stateCompleted',
+  current: 'puzzlePath.stateCurrent',
+  locked: 'puzzlePath.stateLocked',
+} as const;
 
 type PuzzlePathItemProps = {
   puzzle: Puzzle;
@@ -37,7 +37,10 @@ export function PuzzlePathItem({
   onPress,
   onLayout,
 }: PuzzlePathItemProps) {
+  const { t } = useTranslation();
+  const topicLabel = useTopicLabel(puzzle.topic);
   const isPlayable = state === 'current' || state === 'completed';
+  const stateLabel = t(STATE_LABEL_KEYS[state]);
 
   return (
     <View
@@ -54,7 +57,10 @@ export function PuzzlePathItem({
         ]}
         accessibilityRole="button"
         accessibilityState={{ disabled: !isPlayable }}
-        accessibilityLabel={`Puzzle ${puzzleNumber}, ${state}`}
+        accessibilityLabel={t('puzzlePath.a11yPuzzle', {
+          number: puzzleNumber,
+          state: stateLabel,
+        })}
       >
         <View style={styles.cardHeader}>
           <View style={styles.headerLeft}>
@@ -72,13 +78,17 @@ export function PuzzlePathItem({
                 state === 'locked' && styles.badgeLocked,
               ]}
             >
-              🥜 Nut #{puzzleNumber}
-              {state !== 'locked' ? ` · ${TOPIC_LABEL[puzzle.topic]}` : ''}
+              {state !== 'locked'
+                ? t('puzzlePath.nutWithTopic', {
+                    number: puzzleNumber,
+                    topic: topicLabel,
+                  })
+                : t('puzzlePath.nutBadge', { number: puzzleNumber })}
             </Text>
           </View>
           {state === 'current' ? (
             <View style={styles.playChip}>
-              <Text style={styles.playChipText}>Play</Text>
+              <Text style={styles.playChipText}>{t('common.play')}</Text>
             </View>
           ) : (
             <Text style={styles.topic}>{TOPIC_EMOJI[puzzle.topic]}</Text>
@@ -87,7 +97,8 @@ export function PuzzlePathItem({
 
         {state === 'locked' ? (
           <Text style={styles.lockedHint}>
-            {lockedMessage ?? `Solve nut #${puzzleNumber - 1} to unlock`}
+            {lockedMessage ??
+              t('puzzlePath.unlockHint', { number: puzzleNumber - 1 })}
           </Text>
         ) : (
           <Text

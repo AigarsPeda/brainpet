@@ -1,10 +1,11 @@
-import { ANIMATION_LABELS, ONE_SHOT_ANIMATIONS, PET_CARE_COOLDOWN_MS } from '@/constants/game';
+import { ONE_SHOT_ANIMATIONS, PET_CARE_COOLDOWN_MS } from '@/constants/game';
 import { getPetScenario } from '@/constants/pet-scenarios';
 import { moodToSegment } from '@/constants/pet-scenarios';
 import { usePetVideoMood } from '@/hooks/use-pet-mood';
 import type { PetAnimationState, PetProfile } from '@/types/game';
 import type { PetAnimationScenario, PetVideoSegment } from '@/types/pet-animation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type ActiveScenario = {
   scenario: PetAnimationScenario;
@@ -16,6 +17,7 @@ export type PetPlaybackState =
   | { kind: 'segment'; segment: PetVideoSegment; mood: PetAnimationState };
 
 export function usePetPlayback(pet: PetProfile) {
+  const { t } = useTranslation();
   const { mood: baseVideoMood, onFallAsleepComplete } = usePetVideoMood(pet);
   const [actionMood, setActionMood] = useState<PetAnimationState | null>(null);
   const [activeScenario, setActiveScenario] = useState<ActiveScenario | null>(
@@ -41,10 +43,10 @@ export function usePetPlayback(pet: PetProfile) {
 
   const displayLabel = useMemo(() => {
     if (playback.kind === 'scenario') {
-      return playback.scenario.label;
+      return t(`scenario.${playback.scenario.id}`);
     }
-    return ANIMATION_LABELS[playback.mood];
-  }, [playback]);
+    return t(`mood.${playback.mood}`);
+  }, [playback, t]);
 
   useEffect(() => {
     const remaining = careCooldownUntil - Date.now();

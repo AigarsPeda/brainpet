@@ -1,8 +1,9 @@
 import { GameColors, getPuzzleCoinReward } from '@/constants/game';
-import { DIFFICULTY_LABELS } from '@/constants/puzzles';
+import { useDifficultyLabel, useDifficultyLabelLower } from '@/hooks/use-difficulty-label';
 import type { PuzzleDifficulty } from '@/types/puzzle';
 import { moderateScale } from '@/utils/scale';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type PuzzlePathProgressSheetProps = {
@@ -20,12 +21,14 @@ export function PuzzlePathProgressSheet({
   totalCount,
   onClose,
 }: PuzzlePathProgressSheetProps) {
+  const { t } = useTranslation();
+  const difficultyLabel = useDifficultyLabel(difficulty);
+  const difficultyLabelLower = useDifficultyLabelLower(difficulty);
   const insets = useSafeAreaInsets();
   const clampedSolved = Math.min(solvedCount, totalCount);
   const progressPercent =
     totalCount > 0 ? Math.min(100, (clampedSolved / totalCount) * 100) : 0;
   const isComplete = clampedSolved >= totalCount && totalCount > 0;
-  const label = DIFFICULTY_LABELS[difficulty].toLowerCase();
   const firstClear = getPuzzleCoinReward(difficulty);
   const replay = getPuzzleCoinReward(difficulty, true);
 
@@ -41,7 +44,7 @@ export function PuzzlePathProgressSheet({
           style={styles.backdrop}
           onPress={onClose}
           accessibilityRole="button"
-          accessibilityLabel="Close progress details"
+          accessibilityLabel={t('progress.a11yClose')}
         />
         <View style={styles.sheet}>
           <View
@@ -52,15 +55,19 @@ export function PuzzlePathProgressSheet({
           >
             <Text style={styles.emoji}>{isComplete ? '🎉' : '🥜'}</Text>
             <Text style={styles.title}>
-              {DIFFICULTY_LABELS[difficulty]} path
+              {t('progress.pathTitle', { difficulty: difficultyLabel })}
             </Text>
             <Text style={styles.count}>
-              {clampedSolved} of {totalCount}
+              {t('progress.countOf', { solved: clampedSolved, total: totalCount })}
             </Text>
             <Text style={styles.subtitle}>
               {isComplete
-                ? `All ${label} nuts cracked!`
-                : `${label} nuts cracked`}
+                ? t('progress.allNutsCracked', {
+                    difficulty: difficultyLabelLower,
+                  })
+                : t('progress.nutsCracked', {
+                    difficulty: difficultyLabelLower,
+                  })}
             </Text>
 
             <View style={styles.progressTrack}>
@@ -68,19 +75,21 @@ export function PuzzlePathProgressSheet({
                 style={[styles.progressFill, { width: `${progressPercent}%` }]}
               />
             </View>
-            <Text style={styles.percent}>{Math.round(progressPercent)}%</Text>
+            <Text style={styles.percent}>
+              {t('common.percent', { value: Math.round(progressPercent) })}
+            </Text>
 
             <View style={styles.rewards}>
               <View style={styles.rewardRow}>
                 <Text style={styles.rewardEmoji}>🪙</Text>
                 <Text style={styles.rewardText}>
-                  {firstClear} coins per new nut
+                  {t('progress.coinsPerNut', { count: firstClear })}
                 </Text>
               </View>
               <View style={styles.rewardRow}>
                 <Text style={styles.rewardEmoji}>✨</Text>
                 <Text style={styles.rewardText}>
-                  {replay} sparkle coins on replay
+                  {t('progress.sparkleReplay', { count: replay })}
                 </Text>
               </View>
             </View>
@@ -89,9 +98,9 @@ export function PuzzlePathProgressSheet({
               style={styles.closeBtn}
               onPress={onClose}
               accessibilityRole="button"
-              accessibilityLabel="Got it"
+              accessibilityLabel={t('progress.a11yGotIt')}
             >
-              <Text style={styles.closeBtnText}>Got it</Text>
+              <Text style={styles.closeBtnText}>{t('common.gotIt')}</Text>
             </Pressable>
           </View>
         </View>
@@ -114,6 +123,8 @@ export function PuzzlePathProgressChip({
   totalCount,
   onPress,
 }: PuzzlePathProgressChipProps) {
+  const { t } = useTranslation();
+  const difficultyLabelLower = useDifficultyLabelLower(difficulty);
   const clampedSolved = Math.min(solvedCount, totalCount);
   const progressPercent =
     totalCount > 0 ? Math.min(100, (clampedSolved / totalCount) * 100) : 0;
@@ -123,12 +134,19 @@ export function PuzzlePathProgressChip({
       style={styles.chip}
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${clampedSolved} of ${totalCount} ${DIFFICULTY_LABELS[difficulty].toLowerCase()} nuts cracked. Tap for details.`}
+      accessibilityLabel={t('progress.a11yChip', {
+        solved: clampedSolved,
+        total: totalCount,
+        difficulty: difficultyLabelLower,
+      })}
     >
       <View style={styles.chipRow}>
         <Text style={styles.chipText}>
-          {clampedSolved}/{totalCount}{' '}
-          {DIFFICULTY_LABELS[difficulty].toLowerCase()} nuts
+          {t('progress.chip', {
+            solved: clampedSolved,
+            total: totalCount,
+            difficulty: difficultyLabelLower,
+          })}
         </Text>
         <Text style={styles.chipChevron}>ⓘ</Text>
       </View>

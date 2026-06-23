@@ -5,6 +5,7 @@ import type { PetStats } from "@/types/game";
 import { moderateScale } from "@/utils/scale";
 import { useCallback, useState } from "react";
 import { type LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 const COMPACT_PET_MIN = 160;
 const COMPACT_PET_MAX = 280;
@@ -64,6 +65,7 @@ export function PetStage({
   onAnimationComplete,
   onStepComplete,
 }: PetStageProps) {
+  const { t } = useTranslation();
   const [avatarWidth, setAvatarWidth] = useState(
     moderateScale(compact ? 220 : 200),
   );
@@ -92,7 +94,9 @@ export function PetStage({
         <Text style={[styles.nameText, compact && styles.nameTextCompact]}>
           {name}
         </Text>
-        <Text style={styles.levelText}>Level {stats.level}</Text>
+        <Text style={styles.levelText}>
+          {t('pet.level', { level: stats.level })}
+        </Text>
       </View>
 
       <Text style={[styles.moodLabel, compact && styles.moodLabelCompact]}>
@@ -115,13 +119,13 @@ export function PetStage({
       <View style={[styles.stats, compact && styles.statsCompact]}>
         <StatBar
           emoji="🍖"
-          label="Hunger"
+          label={t('pet.hunger')}
           value={stats.hunger}
           color={GameColors.hunger}
         />
         <StatBar
           emoji="💛"
-          label="Happiness"
+          label={t('pet.happiness')}
           value={stats.happiness}
           color={GameColors.happiness}
         />

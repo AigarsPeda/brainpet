@@ -1,0 +1,68 @@
+[
+  {
+    "id": "hard-01",
+    "difficulty": "hard",
+    "question": "Pica sadalīta 8 šķēlēs. Tu apēd 3 šķēles un draugs apēd 2. Kāda daļa picas palika?",
+    "choices": ["3/8", "5/8", "1/2"],
+    "correctIndex": 0,
+    "hint": "Apēdas 5 šķēles. Cik šķēļu palika no 8?",
+    "explanation": "8 − 5 = 3 šķēles palika, tātad palika 3/8 picas.",
+    "topic": "logic",
+    "ageRange": [10, 12]
+  },
+  {
+    "id": "hard-02",
+    "difficulty": "hard",
+    "question": "Vilciens nobrauc 60 jūdzes 2 stundās. Ar tādu pašu ātrumu, cik tālu nobrauks 5 stundās?",
+    "choices": ["120 jūdzes", "150 jūdzes", "300 jūdzes"],
+    "correctIndex": 1,
+    "hint": "Vispirms nosaki jūdzes stundā, tad reizini ar 5.",
+    "explanation": "60 ÷ 2 = 30 jūdzes/h. 30 × 5 = 150 jūdzes.",
+    "topic": "logic",
+    "ageRange": [10, 12]
+  },
+  {
+    "id": "hard-03",
+    "difficulty": "hard",
+    "question": "Veikals palielina 40 € rotaļlietas cenu par 25%. Kāda ir jaunā cena?",
+    "choices": ["45 €", "50 €", "65 €"],
+    "correctIndex": 1,
+    "hint": "25% no 40 ir 10. Pieskaiti sākotnējai cenai.",
+    "explanation": "25% no 40 € = 10 €. 40 € + 10 € = 50 €.",
+    "topic": "logic",
+    "ageRange": [11, 13]
+  },
+  {
+    "id": "hard-04",
+    "difficulty": "hard",
+    "question": "Kāds skaitlis nāk nākamais? 1, 1, 2, 3, 5, 8, ?",
+    "choices": ["11", "13", "15"],
+    "correctIndex": 1,
+    "hint": "Katrs skaitlis ir divu iepriekšējo summa.",
+    "explanation": "5 + 8 = 13.",
+    "topic": "patterns",
+    "ageRange": [10, 12]
+  },
+  {
+    "id": "hard-05",
+    "difficulty": "hard",
+    "question": "Kastē ir 4 rindas pa 6 cepumiem. Tu apēd 5 cepumus un dāvini draugam 7. Cik cepumu palika?",
+    "choices": ["12", "14", "16"],
+    "correctIndex": 0,
+    "hint": "Nosaki kopējo cepumu skaitu, tad atņem apēstos un uzdāvinātos.",
+    "explanation": "4 × 6 = 24 cepumi. 24 − 5 − 7 = 12 palika.",
+    "topic": "multiplication",
+    "ageRange": [10, 12]
+  },
+  {
+    "id": "hard-06",
+    "difficulty": "hard",
+    "question": "Trīs draugi dalās 5 ābolus vienlīdzīgi. Cik veselu ābolu katrs saņem, ja paliek pārpalikums?",
+    "choices": ["1 katram, 2 palika", "2 katram, 1 palika", "1 katram, nekas nepalika"],
+    "correctIndex": 0,
+    "hint": "Dali 5 ar 3 un domā par atlikumu.",
+    "explanation": "5 ÷ 3 = 1 ar atlikumu 2.",
+    "topic": "logic",
+    "ageRange": [10, 12]
+  }
+]

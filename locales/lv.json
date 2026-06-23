@@ -1,0 +1,155 @@
+{
+  "common": {
+    "back": "← Atpakaļ",
+    "close": "Aizvērt",
+    "gotIt": "Sapratu",
+    "play": "Spēlēt",
+    "saving": "Saglabā…",
+    "percent": "{{value}}%"
+  },
+  "settings": {
+    "title": "Iestatījumi",
+    "language": "Valoda",
+    "languageHint": "Izvēlies valodu izvēlnēm un uzdevumiem."
+  },
+  "locale": {
+    "en": "English",
+    "lv": "Latviešu"
+  },
+  "home": {
+    "greeting": "Sveiki!",
+    "subtitle": "Rūpējies par {{name}}",
+    "pet": "Apmīļot",
+    "feed": "Barot",
+    "feedCost": "{{cost}} 🪙",
+    "solvePuzzle": "🥜 Atrisināt uzdevumu",
+    "solvePuzzleHint": "Nopelni monētas {{name}}",
+    "giveMoment": "Dod {{name}} brīdi!",
+    "notHungry": "{{name}} tagad nav izsalcis.",
+    "needCoinsFeed": "Vajag {{cost}} monētas, lai barotu {{name}}!",
+    "enjoyedSnack": "{{name}} baudīja uzkodu!",
+    "a11yPet": "Apmīļot savu draugu",
+    "a11yFeed": "Barot par {{cost}} monētām",
+    "a11ySolve": "Atrisināt matemātikas uzdevumu",
+    "a11ySettings": "Atvērt iestatījumus"
+  },
+  "onboarding": {
+    "title": "Dod savam kucēnam vārdu!",
+    "subtitle": "Izvēlies vārdu savam jaunajam draugam. To redzēsi sākuma ekrānā.",
+    "petName": "Mājdzīvnieka vārds",
+    "placeholder": "piem., Reksis",
+    "charCount": "{{count}}/{{max}} rakstzīmes",
+    "meetPet": "Satikt savu draugu!",
+    "a11yPetName": "Mājdzīvnieka vārds",
+    "a11yContinue": "Turpināt ar mājdzīvnieka vārdu"
+  },
+  "pet": {
+    "level": "{{level}}. līmenis",
+    "hunger": "Izsalkums",
+    "happiness": "Laime"
+  },
+  "mood": {
+    "idle": "Jūtas labi",
+    "excited": "Tik priecīgs!",
+    "dancing": "Ballītes laiks!",
+    "eating": "Njam, njam!",
+    "angry": "Tevis pietrūka!",
+    "sad": "Vajag uzmanību",
+    "fallingAsleep": "Sāk gulēt…",
+    "sleeping": "Zzz…",
+    "correct": "Lieliski!",
+    "coinCatch": "Monēta noķerta!"
+  },
+  "scenario": {
+    "fallAsleep": "Sāk gulēt…",
+    "wakeUp": "Mostas…"
+  },
+  "difficulty": {
+    "easy": "Viegls",
+    "medium": "Vidējs",
+    "hard": "Grūts"
+  },
+  "topic": {
+    "addition": "Saskaitīšana",
+    "subtraction": "Atņemšana",
+    "multiplication": "Reizināšana",
+    "logic": "Loģika",
+    "patterns": "Secības"
+  },
+  "puzzlePath": {
+    "title": "Uzdevumu taka",
+    "subtitle": "Izvēlies grūtību {{name}}",
+    "allNutsCracked": "Visi {{difficulty}} rieksti sakalti!",
+    "tryAnother": "Izmēģini citu grūtību vai atkārto favorītus.",
+    "playNut": "Spēlēt riekstu #{{number}}",
+    "playCurrent": "Spēlēt pašreizējo uzdevumu",
+    "a11yBack": "Atpakaļ",
+    "nutBadge": "🥜 Rieksts #{{number}}",
+    "nutWithTopic": "🥜 Rieksts #{{number}} · {{topic}}",
+    "unlockHint": "Atrisini riekstu #{{number}}, lai atbloķētu",
+    "a11yPuzzle": "Uzdevums {{number}}, {{state}}",
+    "stateCompleted": "pabeigts",
+    "stateCurrent": "pašreizējais",
+    "stateLocked": "slēgts"
+  },
+  "progress": {
+    "pathTitle": "{{difficulty}} taka",
+    "countOf": "{{solved}} no {{total}}",
+    "nutsCracked": "{{difficulty}} rieksti sakalti",
+    "allNutsCracked": "Visi {{difficulty}} rieksti sakalti!",
+    "coinsPerNut": "{{count}} monētas par jaunu riekstu",
+    "sparkleReplay": "{{count}} mirdzošas monētas atkārtojumā",
+    "chip": "{{solved}}/{{total}} {{difficulty}} rieksti",
+    "a11yChip": "{{solved}} no {{total}} {{difficulty}} riekstiem sakalti. Pieskaries detaļām.",
+    "a11yClose": "Aizvērt progresa detaļas",
+    "a11yGotIt": "Sapratu"
+  },
+  "play": {
+    "solveFor": "Atrisini {{name}}",
+    "replayNut": "Atkārtot riekstu #{{number}}",
+    "hardNut": "🥜 Grūtais rieksts #{{number}}",
+    "greatJob": "Lieliski!",
+    "crackedAgain": "Atkal izdevās!",
+    "goodTry": "Labs mēģinājums!",
+    "nextPuzzle": "Nākamais uzdevums",
+    "backToPath": "Atpakaļ uz taku",
+    "tryAgain": "Mēģināt vēlreiz",
+    "backToHome": "Uz sākumu",
+    "coinsEarned": "+{{count}} monētas",
+    "sparkleCoinsEarned": "+{{count}} mirdzošas monētas",
+    "coinsLabel": "monētas",
+    "sparkleCoinsLabel": "mirdzošas monētas",
+    "a11yBack": "Atpakaļ",
+    "a11yNext": "Uz nākamo uzdevumu",
+    "a11yTryAgain": "Mēģināt vēlreiz",
+    "a11yHome": "Uz sākumu"
+  },
+  "lives": {
+    "title": "Dzīvības",
+    "count": "{{current}}/{{max}}",
+    "nextFreeLife": "Nākamā bezmaksas dzīvība pēc",
+    "nextLifeIn": "Nākamā dzīvība pēc",
+    "fullLives": "Tev ir pilnas dzīvības. Ej sakalt riekstus!",
+    "buyLife": "Pirkt dzīvību · {{cost}} 🪙",
+    "needCoinsBuy": "Vajag {{cost}} monētas dzīvībai. Tev ir {{coins}} 🪙",
+    "outOfLives": "Nav dzīvību",
+    "takeBreak": "Paņem pauzi un atgriezies drīz!",
+    "needCoinsShort": "Vajag {{cost}} monētas dzīvībai",
+    "livesFull": "Dzīvības pilnas",
+    "backToPath": "Atpakaļ uz uzdevumu taku",
+    "refillsEvery": "Atjaunojas ik pēc {{minutes}} min",
+    "a11yLives": "Dzīvības {{current}} no {{max}}. Pieskaries, lai pirktu vairāk.",
+    "a11yBuy": "Pirkt dzīvību par {{cost}} monētām",
+    "a11yCloseMenu": "Aizvērt dzīvību izvēlni",
+    "a11yTimer": "Nākamā dzīvība pēc {{time}}",
+    "a11yProgress": "{{percent}} procenti līdz nākamajai dzīvībai"
+  },
+  "economy": {
+    "streakDay_zero": "{{count}} dienu",
+    "streakDay_one": "{{count}} diena",
+    "streakDay_other": "{{count}} dienas"
+  },
+  "difficultyPicker": {
+    "a11y": "{{difficulty}} grūtība, {{coins}} monētas par riekstu"
+  }
+}

@@ -2,6 +2,7 @@ import { GameColors } from "@/constants/game";
 import type { Puzzle } from "@/types/puzzle";
 import { moderateScale } from "@/utils/scale";
 import { StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 type PuzzleCardProps = {
   puzzle: Puzzle;
@@ -10,11 +11,15 @@ type PuzzleCardProps = {
 };
 
 export function PuzzleCard({ puzzle, puzzleNumber, coinReward }: PuzzleCardProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.card}>
       <View style={styles.badgeRow}>
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>🥜 Hard Nut #{puzzleNumber}</Text>
+          <Text style={styles.badgeText}>
+            {t('play.hardNut', { number: puzzleNumber })}
+          </Text>
         </View>
         {coinReward !== undefined ? (
           <View style={styles.coinBadge}>

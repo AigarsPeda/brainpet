@@ -3,6 +3,7 @@ import { GameColors, LIFE_BUY_COST } from "@/constants/game";
 import type { PetAnimationState } from "@/types/game";
 import { moderateScale } from "@/utils/scale";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type ResultOverlayProps = {
@@ -36,6 +37,7 @@ export function ResultOverlay({
   buyLifeCost = LIFE_BUY_COST,
   coins = 0,
 }: ResultOverlayProps) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
   if (!visible) return null;
@@ -80,7 +82,9 @@ export function ResultOverlay({
                 ]}
               >
                 +{coinsEarned}{' '}
-                {coinType === 'sparkle' ? 'sparkle coins' : 'coins'}
+                {coinType === 'sparkle'
+                  ? t('play.sparkleCoinsLabel')
+                  : t('play.coinsLabel')}
               </Text>
             </View>
           )}
@@ -91,11 +95,13 @@ export function ResultOverlay({
               onPress={onContinue}
               accessibilityRole="button"
               accessibilityLabel={
-                continueLabel ?? (correct ? 'Go to next puzzle' : 'Try again')
+                continueLabel ??
+                (correct ? t('play.a11yNext') : t('play.a11yTryAgain'))
               }
             >
               <Text style={styles.primaryButtonText}>
-                {continueLabel ?? (correct ? 'Next puzzle' : 'Try again')}
+                {continueLabel ??
+                  (correct ? t('play.nextPuzzle') : t('play.tryAgain'))}
               </Text>
             </Pressable>
 
@@ -104,9 +110,11 @@ export function ResultOverlay({
                 style={styles.secondaryButton}
                 onPress={onGoHome}
                 accessibilityRole="button"
-                accessibilityLabel="Back to home"
+                accessibilityLabel={t('play.a11yHome')}
               >
-                <Text style={styles.secondaryButtonText}>Back to home</Text>
+                <Text style={styles.secondaryButtonText}>
+                  {t('play.backToHome')}
+                </Text>
               </Pressable>
             )}
 
@@ -115,10 +123,10 @@ export function ResultOverlay({
                 style={styles.buyLifeButton}
                 onPress={onBuyLife}
                 accessibilityRole="button"
-                accessibilityLabel={`Buy a life for ${buyLifeCost} coins`}
+                accessibilityLabel={t('lives.a11yBuy', { cost: buyLifeCost })}
               >
                 <Text style={styles.buyLifeButtonText}>
-                  Buy a life · {buyLifeCost} 🪙
+                  {t('lives.buyLife', { cost: buyLifeCost })}
                 </Text>
               </Pressable>
             ) : null}

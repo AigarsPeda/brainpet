@@ -15,10 +15,11 @@ import {
 import {
   canPlayPuzzleIndex,
   getPuzzleForSession,
+  getPuzzlesByDifficulty,
   isPuzzleDifficulty,
-  PUZZLES_BY_DIFFICULTY,
 } from "@/constants/puzzles";
 import { useGame } from "@/contexts/GameProvider";
+import { useLocale } from "@/contexts/LocaleProvider";
 import type { PetAnimationState } from "@/types/game";
 import type { PuzzleDifficulty } from "@/types/puzzle";
 import { applyLifeRegen, canSpendLife, loseLife } from "@/utils/lives";
@@ -27,6 +28,7 @@ import { moderateScale } from "@/utils/scale";
 import * as Haptics from "expo-haptics";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Platform,
@@ -48,6 +50,8 @@ function triggerHaptic(
 
 export default function PlayScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { locale } = useLocale();
   const {
     difficulty: difficultyParam,
     index: indexParam,
@@ -81,15 +85,15 @@ export default function PlayScreen() {
     recordInteraction,
   } = useGame();
 
-  const puzzles = PUZZLES_BY_DIFFICULTY[difficulty];
+  const puzzles = getPuzzlesByDifficulty(locale, difficulty);
   const savedIndex = progress.puzzlesSolved[difficulty];
   const sessionIndex = Number.isFinite(parsedIndex) ? parsedIndex : savedIndex;
   const isReplay =
     replayParam === "true" ||
     (Number.isFinite(parsedIndex) && parsedIndex < savedIndex);
   const puzzle = useMemo(
-    () => getPuzzleForSession(difficulty, sessionIndex),
-    [difficulty, sessionIndex],
+    () => getPuzzleForSession(locale, difficulty, sessionIndex),
+    [difficulty, locale, sessionIndex],
   );
 
   const puzzleNumber = sessionIndex + 1;
@@ -281,9 +285,9 @@ export default function PlayScreen() {
               onPress={exitToPath}
               style={styles.backBtn}
               accessibilityRole="button"
-              accessibilityLabel="Go back"
+              accessibilityLabel={t("play.a11yBack")}
             >
-              <Text style={styles.backText}>← Back</Text>
+              <Text style={styles.backText}>{t("common.back")}</Text>
             </Pressable>
             <GameHeaderStats
               coins={wallet.coins}
@@ -314,13 +318,13 @@ export default function PlayScreen() {
             disabled={answered}
             style={[styles.backBtn, answered && styles.backBtnDisabled]}
             accessibilityRole="button"
-            accessibilityLabel="Go back"
+            accessibilityLabel={t("play.a11yBack")}
             accessibilityState={{ disabled: answered }}
           >
             <Text
               style={[styles.backText, answered && styles.backTextDisabled]}
             >
-              ← Back
+              {t("common.back")}
             </Text>
           </Pressable>
           <GameHeaderStats
@@ -331,7 +335,9 @@ export default function PlayScreen() {
         </View>
 
         <Text style={styles.title}>
-          {isReplay ? `Replay nut #${puzzleNumber}` : `Solve for ${pet.name}`}
+          {isReplay
+            ? t("play.replayNut", { number: puzzleNumber })
+            : t("play.solveFor", { name: pet.name })}
         </Text>
 
         <ScrollView
@@ -377,9 +383,9 @@ export default function PlayScreen() {
           message={
             isCorrect
               ? isReplay
-                ? "Cracked it again!"
-                : "Great job!"
-              : "Good try!"
+                ? t("play.crackedAgain")
+                : t("play.greatJob")
+              : t("play.goodTry")
           }
           detail={isCorrect ? puzzle.explanation : puzzle.hint}
           coinsEarned={coinsEarned}
@@ -387,11 +393,11 @@ export default function PlayScreen() {
           continueLabel={
             isCorrect
               ? isReplay
-                ? "Back to path"
-                : "Next puzzle"
+                ? t("play.backToPath")
+                : t("play.nextPuzzle")
               : canRetry
-                ? "Try again"
-                : "Back to path"
+                ? t("play.tryAgain")
+                : t("play.backToPath")
           }
           onContinue={handleContinue}
           onGoHome={isCorrect && !isReplay ? handleGoHome : undefined}

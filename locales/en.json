@@ -1,0 +1,154 @@
+{
+  "common": {
+    "back": "← Back",
+    "close": "Close",
+    "gotIt": "Got it",
+    "play": "Play",
+    "saving": "Saving…",
+    "percent": "{{value}}%"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languageHint": "Choose the language for menus and puzzles."
+  },
+  "locale": {
+    "en": "English",
+    "lv": "Latviešu"
+  },
+  "home": {
+    "greeting": "Hi there!",
+    "subtitle": "Take care of {{name}}",
+    "pet": "Pet",
+    "feed": "Feed",
+    "feedCost": "{{cost}} 🪙",
+    "solvePuzzle": "🥜 Solve a Puzzle",
+    "solvePuzzleHint": "Earn coins for {{name}}",
+    "giveMoment": "Give {{name}} a moment!",
+    "notHungry": "{{name}} isn't hungry right now.",
+    "needCoinsFeed": "Need {{cost}} coins to feed {{name}}!",
+    "enjoyedSnack": "{{name}} enjoyed the snack!",
+    "a11yPet": "Pet your companion",
+    "a11yFeed": "Feed for {{cost}} coins",
+    "a11ySolve": "Solve a math puzzle",
+    "a11ySettings": "Open settings"
+  },
+  "onboarding": {
+    "title": "Name your puppy!",
+    "subtitle": "Pick a name for your new friend. You can see it on the home screen.",
+    "petName": "Pet name",
+    "placeholder": "e.g. Buddy",
+    "charCount": "{{count}}/{{max}} characters",
+    "meetPet": "Meet my pet!",
+    "a11yPetName": "Pet name",
+    "a11yContinue": "Continue with pet name"
+  },
+  "pet": {
+    "level": "Level {{level}}",
+    "hunger": "Hunger",
+    "happiness": "Happiness"
+  },
+  "mood": {
+    "idle": "Feeling good",
+    "excited": "So happy!",
+    "dancing": "Party time!",
+    "eating": "Yum yum!",
+    "angry": "Missed you!",
+    "sad": "Needs attention",
+    "fallingAsleep": "Getting sleepy…",
+    "sleeping": "Zzz…",
+    "correct": "Nice one!",
+    "coinCatch": "Coin caught!"
+  },
+  "scenario": {
+    "fallAsleep": "Getting sleepy…",
+    "wakeUp": "Waking up…"
+  },
+  "difficulty": {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard"
+  },
+  "topic": {
+    "addition": "Addition",
+    "subtraction": "Subtraction",
+    "multiplication": "Multiplication",
+    "logic": "Logic",
+    "patterns": "Patterns"
+  },
+  "puzzlePath": {
+    "title": "Puzzle path",
+    "subtitle": "Choose a difficulty for {{name}}",
+    "allNutsCracked": "All {{difficulty}} nuts cracked!",
+    "tryAnother": "Try another difficulty or replay your favorites.",
+    "playNut": "Play nut #{{number}}",
+    "playCurrent": "Play current puzzle",
+    "a11yBack": "Go back",
+    "nutBadge": "🥜 Nut #{{number}}",
+    "nutWithTopic": "🥜 Nut #{{number}} · {{topic}}",
+    "unlockHint": "Solve nut #{{number}} to unlock",
+    "a11yPuzzle": "Puzzle {{number}}, {{state}}",
+    "stateCompleted": "completed",
+    "stateCurrent": "current",
+    "stateLocked": "locked"
+  },
+  "progress": {
+    "pathTitle": "{{difficulty}} path",
+    "countOf": "{{solved}} of {{total}}",
+    "nutsCracked": "{{difficulty}} nuts cracked",
+    "allNutsCracked": "All {{difficulty}} nuts cracked!",
+    "coinsPerNut": "{{count}} coins per new nut",
+    "sparkleReplay": "{{count}} sparkle coins on replay",
+    "chip": "{{solved}}/{{total}} {{difficulty}} nuts",
+    "a11yChip": "{{solved}} of {{total}} {{difficulty}} nuts cracked. Tap for details.",
+    "a11yClose": "Close progress details",
+    "a11yGotIt": "Got it"
+  },
+  "play": {
+    "solveFor": "Solve for {{name}}",
+    "replayNut": "Replay nut #{{number}}",
+    "hardNut": "🥜 Hard Nut #{{number}}",
+    "greatJob": "Great job!",
+    "crackedAgain": "Cracked it again!",
+    "goodTry": "Good try!",
+    "nextPuzzle": "Next puzzle",
+    "backToPath": "Back to path",
+    "tryAgain": "Try again",
+    "backToHome": "Back to home",
+    "coinsEarned": "+{{count}} coins",
+    "sparkleCoinsEarned": "+{{count}} sparkle coins",
+    "coinsLabel": "coins",
+    "sparkleCoinsLabel": "sparkle coins",
+    "a11yBack": "Go back",
+    "a11yNext": "Go to next puzzle",
+    "a11yTryAgain": "Try again",
+    "a11yHome": "Back to home"
+  },
+  "lives": {
+    "title": "Lives",
+    "count": "{{current}}/{{max}}",
+    "nextFreeLife": "Next free life in",
+    "nextLifeIn": "Next life in",
+    "fullLives": "You are full on lives. Go crack some nuts!",
+    "buyLife": "Buy a life · {{cost}} 🪙",
+    "needCoinsBuy": "Need {{cost}} coins to buy a life. You have {{coins}} 🪙",
+    "outOfLives": "Out of lives",
+    "takeBreak": "Take a break and come back soon!",
+    "needCoinsShort": "Need {{cost}} coins to buy a life",
+    "livesFull": "Lives full",
+    "backToPath": "Back to puzzle path",
+    "refillsEvery": "Refills every {{minutes}} min",
+    "a11yLives": "Lives {{current}} of {{max}}. Tap to buy more.",
+    "a11yBuy": "Buy a life for {{cost}} coins",
+    "a11yCloseMenu": "Close lives menu",
+    "a11yTimer": "Next life in {{time}}",
+    "a11yProgress": "{{percent}} percent until next life"
+  },
+  "economy": {
+    "streakDay_one": "{{count}} day",
+    "streakDay_other": "{{count}} days"
+  },
+  "difficultyPicker": {
+    "a11y": "{{difficulty}} difficulty, {{coins}} coins per nut"
+  }
+}

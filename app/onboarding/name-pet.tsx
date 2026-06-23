@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Redirect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -26,6 +27,7 @@ function triggerHaptic() {
 
 export default function NamePetScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { isReady, hasCompletedOnboarding, completeOnboarding } = useGame();
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,19 +70,17 @@ export default function NamePetScreen() {
         <View style={styles.screen}>
           <View style={styles.header}>
             <Text style={styles.emoji}>🐶</Text>
-            <Text style={styles.title}>Name your puppy!</Text>
-            <Text style={styles.subtitle}>
-              Pick a name for your new friend. You can see it on the home screen.
-            </Text>
+            <Text style={styles.title}>{t('onboarding.title')}</Text>
+            <Text style={styles.subtitle}>{t('onboarding.subtitle')}</Text>
           </View>
 
           <View style={styles.form}>
-            <Text style={styles.label}>Pet name</Text>
+            <Text style={styles.label}>{t('onboarding.petName')}</Text>
             <TextInput
               style={styles.input}
               value={name}
               onChangeText={setName}
-              placeholder="e.g. Buddy"
+              placeholder={t('onboarding.placeholder')}
               placeholderTextColor={GameColors.textMuted}
               maxLength={PET_NAME_MAX_LENGTH}
               autoCapitalize="words"
@@ -88,10 +88,13 @@ export default function NamePetScreen() {
               returnKeyType="done"
               onSubmitEditing={handleContinue}
               autoFocus
-              accessibilityLabel="Pet name"
+              accessibilityLabel={t('onboarding.a11yPetName')}
             />
             <Text style={styles.hint}>
-              {trimmedName.length}/{PET_NAME_MAX_LENGTH} characters
+              {t('onboarding.charCount', {
+                count: trimmedName.length,
+                max: PET_NAME_MAX_LENGTH,
+              })}
             </Text>
           </View>
 
@@ -103,11 +106,11 @@ export default function NamePetScreen() {
             onPress={handleContinue}
             disabled={!canContinue}
             accessibilityRole="button"
-            accessibilityLabel="Continue with pet name"
+            accessibilityLabel={t('onboarding.a11yContinue')}
             accessibilityState={{ disabled: !canContinue }}
           >
             <Text style={styles.primaryBtnText}>
-              {isSubmitting ? 'Saving…' : 'Meet my pet!'}
+              {isSubmitting ? t('common.saving') : t('onboarding.meetPet')}
             </Text>
           </Pressable>
         </View>

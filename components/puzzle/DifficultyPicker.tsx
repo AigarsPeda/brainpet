@@ -1,39 +1,61 @@
-import { DIFFICULTY_LABELS, PUZZLE_DIFFICULTIES } from '@/constants/puzzles';
+import { PUZZLE_DIFFICULTIES } from '@/constants/puzzles';
 import { GameColors, getPuzzleCoinReward } from '@/constants/game';
+import { useDifficultyLabel } from '@/hooks/use-difficulty-label';
 import type { PuzzleDifficulty } from '@/types/puzzle';
 import { moderateScale } from '@/utils/scale';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 type DifficultyPickerProps = {
   selected: PuzzleDifficulty;
   onSelect: (difficulty: PuzzleDifficulty) => void;
 };
 
+function DifficultyTab({
+  difficulty,
+  isSelected,
+  onSelect,
+}: {
+  difficulty: PuzzleDifficulty;
+  isSelected: boolean;
+  onSelect: (difficulty: PuzzleDifficulty) => void;
+}) {
+  const { t } = useTranslation();
+  const label = useDifficultyLabel(difficulty);
+  const coinReward = getPuzzleCoinReward(difficulty);
+
+  return (
+    <Pressable
+      onPress={() => onSelect(difficulty)}
+      style={[styles.tab, isSelected && styles.tabSelected]}
+      accessibilityRole="button"
+      accessibilityState={{ selected: isSelected }}
+      accessibilityLabel={t('difficultyPicker.a11y', {
+        difficulty: label,
+        coins: coinReward,
+      })}
+    >
+      <Text style={[styles.tabText, isSelected && styles.tabTextSelected]}>
+        {label}
+      </Text>
+      <Text style={[styles.coinText, isSelected && styles.coinTextSelected]}>
+        🪙 {coinReward}
+      </Text>
+    </Pressable>
+  );
+}
+
 export function DifficultyPicker({ selected, onSelect }: DifficultyPickerProps) {
   return (
     <View style={styles.row}>
-      {PUZZLE_DIFFICULTIES.map((difficulty) => {
-        const isSelected = selected === difficulty;
-        const coinReward = getPuzzleCoinReward(difficulty);
-
-        return (
-          <Pressable
-            key={difficulty}
-            onPress={() => onSelect(difficulty)}
-            style={[styles.tab, isSelected && styles.tabSelected]}
-            accessibilityRole="button"
-            accessibilityState={{ selected: isSelected }}
-            accessibilityLabel={`${DIFFICULTY_LABELS[difficulty]} difficulty, ${coinReward} coins per nut`}
-          >
-            <Text style={[styles.tabText, isSelected && styles.tabTextSelected]}>
-              {DIFFICULTY_LABELS[difficulty]}
-            </Text>
-            <Text style={[styles.coinText, isSelected && styles.coinTextSelected]}>
-              🪙 {coinReward}
-            </Text>
-          </Pressable>
-        );
-      })}
+      {PUZZLE_DIFFICULTIES.map((difficulty) => (
+        <DifficultyTab
+          key={difficulty}
+          difficulty={difficulty}
+          isSelected={selected === difficulty}
+          onSelect={onSelect}
+        />
+      ))}
     </View>
   );
 }

@@ -23,6 +23,7 @@ import { moderateScale } from "@/utils/scale";
 import * as Haptics from "expo-haptics";
 import { Redirect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Platform,
@@ -41,6 +42,7 @@ function triggerHaptic() {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const {
     isReady,
     hasCompletedOnboarding,
@@ -116,17 +118,19 @@ export default function HomeScreen() {
     const wasAsleep = pet.isAsleep === true;
 
     if (isCareAnimationPlaying || isCareBlocked) {
-      rejectCareAction(`Give ${pet.name} a moment!`);
+      rejectCareAction(t("home.giveMoment", { name: pet.name }));
       return;
     }
 
     if (!canFeedForEffect(pet.stats, wasAsleep)) {
-      rejectCareAction(`${pet.name} isn't hungry right now.`);
+      rejectCareAction(t("home.notHungry", { name: pet.name }));
       return;
     }
 
     if (wallet.coins < FEED_COST) {
-      rejectCareAction(`Need ${FEED_COST} coins to feed ${pet.name}!`);
+      rejectCareAction(
+        t("home.needCoinsFeed", { cost: FEED_COST, name: pet.name }),
+      );
       return;
     }
 
@@ -144,7 +148,7 @@ export default function HomeScreen() {
         : clampStat(stats.happiness + FEED_HAPPINESS_BOOST),
     }));
     playActionMood(wasAsleep, "eating");
-    showMessage(`${pet.name} enjoyed the snack!`);
+    showMessage(t("home.enjoyedSnack", { name: pet.name }));
   }, [
     beginCareAction,
     isCareAnimationPlaying,
@@ -157,9 +161,16 @@ export default function HomeScreen() {
     rejectCareAction,
     setWallet,
     showMessage,
+    t,
     wakePet,
     wallet.coins,
   ]);
+
+  const handleOpenSettings = useCallback(() => {
+    recordInteraction();
+    triggerHaptic();
+    router.push("/settings");
+  }, [recordInteraction, router]);
 
   const handlePlayPuzzle = useCallback(() => {
     recordInteraction();
@@ -202,14 +213,26 @@ export default function HomeScreen() {
       <View style={styles.screen}>
         <View style={styles.header}>
           <View style={styles.headerText}>
-            <Text style={styles.greeting}>Hi there!</Text>
-            <Text style={styles.subtitle}>Take care of {pet.name}</Text>
+            <Text style={styles.greeting}>{t("home.greeting")}</Text>
+            <Text style={styles.subtitle}>
+              {t("home.subtitle", { name: pet.name })}
+            </Text>
           </View>
-          <GameHeaderStats
-            coins={wallet.coins}
-            streak={progress.streak}
-            lives={progress.lives}
-          />
+          <View style={styles.headerActions}>
+            <GameHeaderStats
+              coins={wallet.coins}
+              streak={progress.streak}
+              lives={progress.lives}
+            />
+            <Pressable
+              onPress={handleOpenSettings}
+              style={styles.settingsBtn}
+              accessibilityRole="button"
+              accessibilityLabel={t("home.a11ySettings")}
+            >
+              <Text style={styles.settingsEmoji}>⚙️</Text>
+            </Pressable>
+          </View>
         </View>
 
         <View style={styles.stageWrap}>
@@ -240,11 +263,11 @@ export default function HomeScreen() {
               onPress={handlePetTap}
               disabled={petAnimating}
               accessibilityRole="button"
-              accessibilityLabel="Pet your companion"
+              accessibilityLabel={t("home.a11yPet")}
               accessibilityState={{ disabled: petAnimating }}
             >
               <Text style={styles.actionEmoji}>🐾</Text>
-              <Text style={styles.actionLabel}>Pet</Text>
+              <Text style={styles.actionLabel}>{t("home.pet")}</Text>
             </Pressable>
 
             <Pressable
@@ -256,15 +279,17 @@ export default function HomeScreen() {
               onPress={handleFeed}
               disabled={!canFeedEffect || isCareAnimationPlaying || isCareBlocked}
               accessibilityRole="button"
-              accessibilityLabel={`Feed for ${FEED_COST} coins`}
+              accessibilityLabel={t("home.a11yFeed", { cost: FEED_COST })}
               accessibilityState={{
                 disabled:
                   !canFeedEffect || isCareAnimationPlaying || isCareBlocked,
               }}
             >
               <Text style={styles.actionEmoji}>🍖</Text>
-              <Text style={styles.actionLabel}>Feed</Text>
-              <Text style={styles.actionHint}>{FEED_COST} 🪙</Text>
+              <Text style={styles.actionLabel}>{t("home.feed")}</Text>
+              <Text style={styles.actionHint}>
+                {t("home.feedCost", { cost: FEED_COST })}
+              </Text>
             </Pressable>
           </View>
 
@@ -272,10 +297,12 @@ export default function HomeScreen() {
             style={styles.primaryBtn}
             onPress={handlePlayPuzzle}
             accessibilityRole="button"
-            accessibilityLabel="Solve a math puzzle"
+            accessibilityLabel={t("home.a11ySolve")}
           >
-            <Text style={styles.primaryBtnText}>🥜 Solve a Puzzle</Text>
-            <Text style={styles.primaryBtnHint}>Earn coins for {pet.name}</Text>
+            <Text style={styles.primaryBtnText}>{t("home.solvePuzzle")}</Text>
+            <Text style={styles.primaryBtnHint}>
+              {t("home.solvePuzzleHint", { name: pet.name })}
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -309,6 +336,24 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flex: 1,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: moderateScale(6),
+  },
+  settingsBtn: {
+    minWidth: moderateScale(40),
+    minHeight: moderateScale(40),
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: moderateScale(12),
+    backgroundColor: GameColors.card,
+    borderWidth: 2,
+    borderColor: GameColors.cardBorder,
+  },
+  settingsEmoji: {
+    fontSize: moderateScale(18),
   },
   greeting: {
     fontSize: moderateScale(24),

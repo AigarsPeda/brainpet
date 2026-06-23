@@ -2,6 +2,7 @@ import { GameColors, LIFE_REGEN_MINUTES } from '@/constants/game';
 import { formatRegenClock, regenProgress } from '@/utils/lives';
 import { moderateScale } from '@/utils/scale';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
@@ -42,6 +43,7 @@ export function LifeRegenClock({
   compact = true,
   showProgress = !compact,
 }: LifeRegenClockProps) {
+  const { t } = useTranslation();
   const display = useMemo(() => formatRegenClock(regenMs), [regenMs]);
   const progress = useMemo(() => regenProgress(regenMs), [regenMs]);
 
@@ -49,7 +51,7 @@ export function LifeRegenClock({
     <View
       style={[styles.wrap, compact && styles.wrapCompact]}
       accessibilityRole="timer"
-      accessibilityLabel={`Next life in ${display}`}
+      accessibilityLabel={t('lives.a11yTimer', { time: display })}
     >
       <View style={styles.timeRow}>
         {compact ? <Text style={styles.plus}>+</Text> : null}
@@ -59,7 +61,9 @@ export function LifeRegenClock({
       {showProgress ? (
         <View
           style={styles.progressTrack}
-          accessibilityLabel={`${Math.round(progress * 100)} percent until next life`}
+          accessibilityLabel={t('lives.a11yProgress', {
+            percent: Math.round(progress * 100),
+          })}
         >
           <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
         </View>
@@ -67,7 +71,7 @@ export function LifeRegenClock({
 
       {!compact && showProgress ? (
         <Text style={styles.progressHint}>
-          Refills every {LIFE_REGEN_MINUTES} min
+          {t('lives.refillsEvery', { minutes: LIFE_REGEN_MINUTES })}
         </Text>
       ) : null}
     </View>

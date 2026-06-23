@@ -9,18 +9,20 @@ import { PuzzlePathItem } from '@/components/puzzle/PuzzlePathItem';
 import { GameColors } from '@/constants/game';
 import {
   canPlayPuzzleIndex,
-  DIFFICULTY_LABELS,
   getPuzzlePathState,
+  getPuzzlesByDifficulty,
   isPuzzleDifficulty,
-  PUZZLES_BY_DIFFICULTY,
 } from '@/constants/puzzles';
 import { useGame } from '@/contexts/GameProvider';
+import { useLocale } from '@/contexts/LocaleProvider';
+import { useDifficultyLabelLower } from '@/hooks/use-difficulty-label';
 import type { PuzzleDifficulty } from '@/types/puzzle';
 import { canSpendLife } from '@/utils/lives';
 import { moderateScale } from '@/utils/scale';
 import * as Haptics from 'expo-haptics';
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Platform,
@@ -40,6 +42,8 @@ function triggerHaptic() {
 
 export default function PuzzlesScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { locale } = useLocale();
   const { difficulty: difficultyParam } = useLocalSearchParams<{
     difficulty?: string;
   }>();
@@ -56,6 +60,7 @@ export default function PuzzlesScreen() {
     paramDifficulty ?? 'easy',
   );
   const [showProgress, setShowProgress] = useState(false);
+  const difficultyLabelLower = useDifficultyLabelLower(difficulty);
 
   useEffect(() => {
     if (paramDifficulty) {
@@ -63,7 +68,7 @@ export default function PuzzlesScreen() {
     }
   }, [paramDifficulty]);
 
-  const puzzles = PUZZLES_BY_DIFFICULTY[difficulty];
+  const puzzles = getPuzzlesByDifficulty(locale, difficulty);
   const solvedCount = progress.puzzlesSolved[difficulty];
   const scrollRef = useRef<ScrollView>(null);
   const currentIndex = Math.min(solvedCount, Math.max(0, puzzles.length - 1));
@@ -134,9 +139,9 @@ export default function PuzzlesScreen() {
             onPress={handleBackHome}
             style={styles.backBtn}
             accessibilityRole="button"
-            accessibilityLabel="Go back"
+            accessibilityLabel={t('puzzlePath.a11yBack')}
           >
-            <Text style={styles.backText}>← Back</Text>
+            <Text style={styles.backText}>{t('common.back')}</Text>
           </Pressable>
           <GameHeaderStats
             coins={wallet.coins}
@@ -145,8 +150,10 @@ export default function PuzzlesScreen() {
           />
         </View>
 
-        <Text style={styles.title}>Puzzle path</Text>
-        <Text style={styles.subtitle}>Choose a difficulty for {pet.name}</Text>
+        <Text style={styles.title}>{t('puzzlePath.title')}</Text>
+        <Text style={styles.subtitle}>
+          {t('puzzlePath.subtitle', { name: pet.name })}
+        </Text>
 
         <DifficultyPicker
           selected={difficulty}
@@ -208,11 +215,11 @@ export default function PuzzlesScreen() {
             <View style={styles.completeCard}>
               <Text style={styles.completeEmoji}>🎉</Text>
               <Text style={styles.completeTitle}>
-                All {DIFFICULTY_LABELS[difficulty].toLowerCase()} nuts cracked!
+                {t('puzzlePath.allNutsCracked', {
+                  difficulty: difficultyLabelLower,
+                })}
               </Text>
-              <Text style={styles.completeText}>
-                Try another difficulty or replay your favorites.
-              </Text>
+              <Text style={styles.completeText}>{t('puzzlePath.tryAnother')}</Text>
             </View>
           ) : null}
         </ScrollView>
@@ -222,10 +229,10 @@ export default function PuzzlesScreen() {
             style={styles.primaryBtn}
             onPress={handlePlayCurrent}
             accessibilityRole="button"
-            accessibilityLabel="Play current puzzle"
+            accessibilityLabel={t('puzzlePath.playCurrent')}
           >
             <Text style={styles.primaryBtnText}>
-              Play nut #{solvedCount + 1}
+              {t('puzzlePath.playNut', { number: solvedCount + 1 })}
             </Text>
             </Pressable>
           ) : null}

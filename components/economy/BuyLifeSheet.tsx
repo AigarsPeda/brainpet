@@ -8,6 +8,7 @@ import {
 } from '@/utils/lives';
 import { moderateScale } from '@/utils/scale';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -38,6 +39,7 @@ export function BuyLifeSheet({
   onBuyLife,
   onClose,
 }: BuyLifeSheetProps) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const now = useRegenNow(visible);
 
@@ -63,7 +65,7 @@ export function BuyLifeSheet({
           style={styles.backdrop}
           onPress={onClose}
           accessibilityRole="button"
-          accessibilityLabel="Close lives menu"
+          accessibilityLabel={t('lives.a11yCloseMenu')}
         />
         <View style={styles.sheet}>
           <View
@@ -73,34 +75,34 @@ export function BuyLifeSheet({
             ]}
           >
           <Text style={styles.emoji}>❤️</Text>
-          <Text style={styles.title}>Lives</Text>
+          <Text style={styles.title}>{t('lives.title')}</Text>
           <Text style={styles.count}>
-            {synced.current}/{MAX_LIVES}
+            {t('lives.count', { current: synced.current, max: MAX_LIVES })}
           </Text>
 
           {!isFull && regenMs !== null ? (
             <View style={styles.regenWrap}>
-              <Text style={styles.regenLabel}>Next free life in</Text>
+              <Text style={styles.regenLabel}>{t('lives.nextFreeLife')}</Text>
               <LifeRegenClock regenMs={regenMs} compact={false} showProgress />
             </View>
           ) : null}
 
           {isFull ? (
-            <Text style={styles.hint}>You are full on lives. Go crack some nuts!</Text>
+            <Text style={styles.hint}>{t('lives.fullLives')}</Text>
           ) : canBuy ? (
             <Pressable
               style={styles.buyBtn}
               onPress={handleBuy}
               accessibilityRole="button"
-              accessibilityLabel={`Buy a life for ${LIFE_BUY_COST} coins`}
+              accessibilityLabel={t('lives.a11yBuy', { cost: LIFE_BUY_COST })}
             >
               <Text style={styles.buyBtnText}>
-                Buy a life · {LIFE_BUY_COST} 🪙
+                {t('lives.buyLife', { cost: LIFE_BUY_COST })}
               </Text>
             </Pressable>
           ) : (
             <Text style={styles.hint}>
-              Need {LIFE_BUY_COST} coins to buy a life. You have {coins} 🪙
+              {t('lives.needCoinsBuy', { cost: LIFE_BUY_COST, coins })}
             </Text>
           )}
 
@@ -108,9 +110,9 @@ export function BuyLifeSheet({
             style={styles.closeBtn}
             onPress={onClose}
             accessibilityRole="button"
-            accessibilityLabel="Close"
+            accessibilityLabel={t('common.close')}
           >
-            <Text style={styles.closeBtnText}>Close</Text>
+            <Text style={styles.closeBtnText}>{t('common.close')}</Text>
           </Pressable>
           </View>
         </View>

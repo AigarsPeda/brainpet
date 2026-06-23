@@ -1,31 +1,44 @@
-import easyPuzzles from '@/assets/puzzles/easy.json';
-import hardPuzzles from '@/assets/puzzles/hard.json';
-import mediumPuzzles from '@/assets/puzzles/medium.json';
+import easyEn from '@/assets/puzzles/easy.json';
+import hardEn from '@/assets/puzzles/hard.json';
+import mediumEn from '@/assets/puzzles/medium.json';
+import easyLv from '@/assets/puzzles/lv/easy.json';
+import hardLv from '@/assets/puzzles/lv/hard.json';
+import mediumLv from '@/assets/puzzles/lv/medium.json';
+import type { AppLocale } from '@/types/locale';
 import type { Puzzle, PuzzleDifficulty } from '@/types/puzzle';
 
 export const PUZZLE_DIFFICULTIES: PuzzleDifficulty[] = ['easy', 'medium', 'hard'];
 
-export const DIFFICULTY_LABELS: Record<PuzzleDifficulty, string> = {
-  easy: 'Easy',
-  medium: 'Medium',
-  hard: 'Hard',
+const PUZZLES_BY_LOCALE: Record<AppLocale, Record<PuzzleDifficulty, Puzzle[]>> = {
+  en: {
+    easy: easyEn as Puzzle[],
+    medium: mediumEn as Puzzle[],
+    hard: hardEn as Puzzle[],
+  },
+  lv: {
+    easy: easyLv as Puzzle[],
+    medium: mediumLv as Puzzle[],
+    hard: hardLv as Puzzle[],
+  },
 };
 
-export const PUZZLES_BY_DIFFICULTY: Record<PuzzleDifficulty, Puzzle[]> = {
-  easy: easyPuzzles as Puzzle[],
-  medium: mediumPuzzles as Puzzle[],
-  hard: hardPuzzles as Puzzle[],
-};
+export function getPuzzlesByDifficulty(
+  locale: AppLocale,
+  difficulty: PuzzleDifficulty,
+): Puzzle[] {
+  return PUZZLES_BY_LOCALE[locale][difficulty];
+}
 
 export function isPuzzleDifficulty(value: string): value is PuzzleDifficulty {
   return value === 'easy' || value === 'medium' || value === 'hard';
 }
 
 export function getPuzzleForSession(
+  locale: AppLocale,
   difficulty: PuzzleDifficulty,
   puzzleIndex: number,
 ): Puzzle {
-  const puzzles = PUZZLES_BY_DIFFICULTY[difficulty];
+  const puzzles = getPuzzlesByDifficulty(locale, difficulty);
   return puzzles[puzzleIndex];
 }
 
