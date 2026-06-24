@@ -1,3 +1,4 @@
+import { LicensesLink } from "@/components/settings/LicensesLink";
 import { GameColors } from "@/constants/game";
 import { useLocale } from "@/contexts/LocaleProvider";
 import { APP_LOCALES, type AppLocale } from "@/types/locale";
@@ -6,7 +7,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 function triggerHaptic() {
@@ -40,7 +41,11 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      <View style={styles.screen}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.screen}
+        showsVerticalScrollIndicator={false}
+      >
         <Pressable
           onPress={handleBack}
           style={styles.backBtn}
@@ -82,7 +87,9 @@ export default function SettingsScreen() {
             })}
           </View>
         </View>
-      </View>
+
+        <LicensesLink />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -92,10 +99,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: GameColors.background,
   },
-  screen: {
+  scroll: {
     flex: 1,
+  },
+  screen: {
     paddingHorizontal: moderateScale(16),
     paddingTop: moderateScale(4),
+    paddingBottom: moderateScale(24),
     gap: moderateScale(16),
   },
   backBtn: {

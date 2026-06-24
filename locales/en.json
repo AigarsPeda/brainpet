@@ -10,7 +10,10 @@
   "settings": {
     "title": "Settings",
     "language": "Language",
-    "languageHint": "Choose the language for menus and puzzles."
+    "languageHint": "Choose the language for menus and puzzles.",
+    "licenses": "Open source licenses",
+    "licensesHint": "Third-party libraries used in BrainPet.",
+    "licensesEmpty": "No licenses found. Run npm run licenses to generate them."
   },
   "locale": {
     "en": "English",
