@@ -1,10 +1,16 @@
-import { GameColors, LIFE_REGEN_MINUTES } from "@/constants/game";
-import { formatRegenClock, regenProgress } from "@/utils/lives";
-import { moderateScale } from "@/utils/scale";
-import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { StyleSheet, Text, View } from "react-native";
-import Animated from "react-native-reanimated";
+import { GameColors, LIFE_REGEN_MINUTES } from '@/constants/game';
+import { formatRegenClock, regenProgress } from '@/utils/lives';
+import { moderateScale } from '@/utils/scale';
+import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
 type LifeRegenClockProps = {
   regenMs: number;
@@ -13,9 +19,28 @@ type LifeRegenClockProps = {
 };
 
 function BlinkingColon({ large = false }: { large?: boolean }) {
+  const opacity = useSharedValue(1);
+
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 500 }),
+        withTiming(0.25, { duration: 500 }),
+      ),
+      -1,
+    );
+  }, [opacity]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
   return (
     <Animated.Text
-      style={[large ? styles.colonLarge : styles.colon, styles.colonBlink]}
+      style={[
+        large ? textStyles.colonLarge : textStyles.colon,
+        animatedStyle,
+      ]}
     >
       :
     </Animated.Text>
@@ -29,13 +54,13 @@ function DigitalTime({
   display: string;
   large?: boolean;
 }) {
-  const parts = display.split(":");
-  const timeStyle = large ? styles.timeLarge : styles.time;
+  const parts = display.split(':');
+  const timeStyle = large ? textStyles.timeLarge : textStyles.time;
 
   return (
-    <View style={styles.digitsRow}>
+    <View style={viewStyles.digitsRow}>
       {parts.map((part, index) => (
-        <View key={`${part}-${index}`} style={styles.digitGroup}>
+        <View key={`${part}-${index}`} style={viewStyles.digitGroup}>
           {index > 0 ? <BlinkingColon large={large} /> : null}
           <Text style={timeStyle}>{part}</Text>
         </View>
@@ -55,120 +80,112 @@ export function LifeRegenClock({
 
   return (
     <View
-      style={[styles.wrap, compact && styles.wrapCompact]}
+      style={[viewStyles.wrap, compact && viewStyles.wrapCompact]}
       accessibilityRole="timer"
-      accessibilityLabel={t("lives.a11yTimer", { time: display })}
+      accessibilityLabel={t('lives.a11yTimer', { time: display })}
     >
-      <View style={styles.timeRow}>
-        {compact ? <Text style={styles.plus}>+</Text> : null}
+      <View style={viewStyles.timeRow}>
+        {compact ? <Text style={textStyles.plus}>+</Text> : null}
         <DigitalTime display={display} large={!compact && showProgress} />
       </View>
 
       {showProgress ? (
         <View
-          style={styles.progressTrack}
-          accessibilityLabel={t("lives.a11yProgress", {
+          style={viewStyles.progressTrack}
+          accessibilityLabel={t('lives.a11yProgress', {
             percent: Math.round(progress * 100),
           })}
         >
           <View
-            style={[styles.progressFill, { width: `${progress * 100}%` }]}
+            style={[viewStyles.progressFill, { width: `${progress * 100}%` }]}
           />
         </View>
       ) : null}
 
       {!compact && showProgress ? (
-        <Text style={styles.progressHint}>
-          {t("lives.refillsEvery", { minutes: LIFE_REGEN_MINUTES })}
+        <Text style={textStyles.progressHint}>
+          {t('lives.refillsEvery', { minutes: LIFE_REGEN_MINUTES })}
         </Text>
       ) : null}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const viewStyles = StyleSheet.create({
   wrap: {
-    alignItems: "center",
+    alignItems: 'center',
     gap: moderateScale(8),
-    width: "100%",
+    width: '100%',
     maxWidth: moderateScale(220),
   },
   wrapCompact: {
-    alignItems: "flex-start",
+    alignItems: 'flex-start',
     gap: 0,
-    width: "auto",
-    maxWidth: "none",
+    width: 'auto',
     marginLeft: moderateScale(2),
     paddingLeft: moderateScale(6),
     borderLeftWidth: 1,
-    borderLeftColor: "rgba(255, 107, 107, 0.2)",
+    borderLeftColor: 'rgba(255, 107, 107, 0.2)',
   },
   timeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  plus: {
-    fontSize: moderateScale(11),
-    fontWeight: "700",
-    color: GameColors.textMuted,
-    marginRight: moderateScale(1),
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   digitsRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   digitGroup: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  time: {
-    fontSize: moderateScale(11),
-    fontWeight: "700",
-    color: GameColors.textMuted,
-    fontVariant: ["tabular-nums"],
-  },
-  timeLarge: {
-    fontSize: moderateScale(36),
-    fontWeight: "800",
-    color: GameColors.primary,
-    fontVariant: ["tabular-nums"],
-  },
-  colon: {
-    fontSize: moderateScale(11),
-    fontWeight: "700",
-    color: GameColors.textMuted,
-  },
-  colonLarge: {
-    fontSize: moderateScale(36),
-    fontWeight: "800",
-    color: GameColors.primary,
-  },
-  colonBlink: {
-    animationName: {
-      "0%": { opacity: 1 },
-      "50%": { opacity: 0.25 },
-      "100%": { opacity: 1 },
-    },
-    animationDuration: "1s",
-    animationIterationCount: "infinite",
-    animationTimingFunction: "linear",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   progressTrack: {
     height: moderateScale(4),
     borderRadius: moderateScale(2),
-    backgroundColor: "rgba(255, 107, 107, 0.12)",
-    overflow: "hidden",
-    width: "100%",
+    backgroundColor: 'rgba(255, 107, 107, 0.12)',
+    overflow: 'hidden',
+    width: '100%',
   },
   progressFill: {
-    height: "100%",
+    height: '100%',
     borderRadius: moderateScale(2),
     backgroundColor: GameColors.primary,
   },
+});
+
+const textStyles = StyleSheet.create({
+  plus: {
+    fontSize: moderateScale(11),
+    fontWeight: '700',
+    color: GameColors.textMuted,
+    marginRight: moderateScale(1),
+  },
+  time: {
+    fontSize: moderateScale(11),
+    fontWeight: '700',
+    color: GameColors.textMuted,
+    fontVariant: ['tabular-nums'],
+  },
+  timeLarge: {
+    fontSize: moderateScale(36),
+    fontWeight: '800',
+    color: GameColors.primary,
+    fontVariant: ['tabular-nums'],
+  },
+  colon: {
+    fontSize: moderateScale(11),
+    fontWeight: '700',
+    color: GameColors.textMuted,
+  },
+  colonLarge: {
+    fontSize: moderateScale(36),
+    fontWeight: '800',
+    color: GameColors.primary,
+  },
   progressHint: {
     fontSize: moderateScale(12),
-    fontWeight: "500",
+    fontWeight: '500',
     color: GameColors.textMuted,
-    textAlign: "center",
+    textAlign: 'center',
   },
 });
