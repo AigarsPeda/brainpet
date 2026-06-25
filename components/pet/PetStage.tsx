@@ -1,21 +1,22 @@
 import { PetAvatar } from "@/components/pet/PetAvatar";
+import { PetSpeechBubble } from "@/components/pet/PetSpeechBubble";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { GameColors } from "@/constants/game";
 import type { PetPlaybackState } from "@/hooks/use-pet-playback";
 import type { PetStats } from "@/types/game";
-import { getHungerDisplayPercent } from "@/utils/pet-care";
+import { clampStat } from "@/utils/pet-care";
 import { moderateScale } from "@/utils/scale";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 
-const COMPACT_PET_MIN = 160;
-const COMPACT_PET_MAX = 280;
+const COMPACT_PET_MIN = 200;
+const COMPACT_PET_MAX = 300;
 
 type PetStageProps = {
   name: string;
   stats: PetStats;
-  moodLabel: string;
+  speechMessage: string;
   playback: PetPlaybackState;
   compact?: boolean;
   onPetPress?: () => void;
@@ -47,7 +48,7 @@ function StatBar({
         <ProgressBar
           progress={clamped / 100}
           fillColor={color}
-          trackColor={GameColors.card}
+          trackColor={GameColors.background}
         />
       </View>
     </View>
@@ -57,7 +58,7 @@ function StatBar({
 export function PetStage({
   name,
   stats,
-  moodLabel,
+  speechMessage,
   playback,
   compact = false,
   onPetPress,
@@ -66,30 +67,27 @@ export function PetStage({
 }: PetStageProps) {
   const { t } = useTranslation();
   const [avatarWidth, setAvatarWidth] = useState(
-    moderateScale(compact ? 220 : 200),
+    moderateScale(compact ? 260 : 200),
   );
 
   const handleAvatarLayout = useCallback(
     (event: LayoutChangeEvent) => {
       if (!compact) return;
 
-      const { width, height } = event.nativeEvent.layout;
-      const fromWidth = width * 0.85;
-      const fromHeight = height * 0.9;
-      const size = Math.min(fromWidth, fromHeight);
+      const { width } = event.nativeEvent.layout;
       const clamped = Math.max(
         moderateScale(COMPACT_PET_MIN),
-        Math.min(moderateScale(COMPACT_PET_MAX), size),
+        Math.min(moderateScale(COMPACT_PET_MAX), Math.round(width)),
       );
 
-      setAvatarWidth(Math.round(clamped));
+      setAvatarWidth(clamped);
     },
     [compact],
   );
 
   return (
     <View style={[styles.stage, compact && styles.stageCompact]}>
-      <View style={[styles.nameBadge, compact && styles.nameBadgeCompact]}>
+      <View style={[styles.nameHeader, compact && styles.nameHeaderCompact]}>
         <Text style={[styles.nameText, compact && styles.nameTextCompact]}>
           {name}
         </Text>
@@ -98,36 +96,46 @@ export function PetStage({
         </Text>
       </View>
 
-      <Text style={[styles.moodLabel, compact && styles.moodLabelCompact]}>
-        {moodLabel}
-      </Text>
+      <View style={styles.petColumnMeasure} onLayout={handleAvatarLayout}>
+        <View
+          style={[
+            styles.petColumn,
+            compact && styles.petColumnCompact,
+            compact && { width: avatarWidth },
+          ]}
+        >
+          <View
+            style={[styles.avatarWrap, compact && styles.avatarWrapCompact]}
+          >
+            <View style={[styles.avatarCluster, { width: avatarWidth }]}>
+              <View style={styles.speechAnchor}>
+                <PetSpeechBubble message={speechMessage} />
+              </View>
+              <PetAvatar
+                playback={playback}
+                width={avatarWidth}
+                onPress={onPetPress}
+                onAnimationComplete={onAnimationComplete}
+                onStepComplete={onStepComplete}
+              />
+            </View>
+          </View>
 
-      <View
-        style={[styles.avatarWrap, compact && styles.avatarWrapCompact]}
-        onLayout={handleAvatarLayout}
-      >
-        <PetAvatar
-          playback={playback}
-          width={avatarWidth}
-          onPress={onPetPress}
-          onAnimationComplete={onAnimationComplete}
-          onStepComplete={onStepComplete}
-        />
-      </View>
-
-      <View style={[styles.stats, compact && styles.statsCompact]}>
-        <StatBar
-          emoji="🍖"
-          label={t("pet.hunger")}
-          value={getHungerDisplayPercent(stats)}
-          color={GameColors.hunger}
-        />
-        <StatBar
-          emoji="💛"
-          label={t("pet.happiness")}
-          value={stats.happiness}
-          color={GameColors.happiness}
-        />
+          <View style={[styles.stats, compact && styles.statsCompact]}>
+            <StatBar
+              emoji="🍖"
+              label={t("pet.fed")}
+              value={clampStat(stats.hunger)}
+              color={GameColors.hunger}
+            />
+            <StatBar
+              emoji="💛"
+              label={t("pet.happiness")}
+              value={stats.happiness}
+              color={GameColors.happiness}
+            />
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -135,10 +143,8 @@ export function PetStage({
 
 const styles = StyleSheet.create({
   stage: {
-    backgroundColor: GameColors.stageBg,
-    borderRadius: moderateScale(24),
-    borderWidth: 3,
-    borderColor: GameColors.stageBorder,
+    backgroundColor: GameColors.card,
+    borderRadius: moderateScale(20),
     paddingVertical: moderateScale(20),
     paddingHorizontal: moderateScale(20),
     alignItems: "center",
@@ -147,24 +153,19 @@ const styles = StyleSheet.create({
   },
   stageCompact: {
     flex: 1,
-    borderRadius: moderateScale(20),
-    paddingVertical: moderateScale(12),
+    justifyContent: "flex-start",
+    borderRadius: moderateScale(16),
+    paddingTop: moderateScale(8),
+    paddingBottom: moderateScale(12),
     paddingHorizontal: moderateScale(14),
     gap: moderateScale(4),
   },
-  nameBadge: {
-    backgroundColor: GameColors.card,
-    borderRadius: moderateScale(16),
-    paddingVertical: moderateScale(8),
-    paddingHorizontal: moderateScale(20),
+  nameHeader: {
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: GameColors.cardBorder,
+    gap: moderateScale(2),
   },
-  nameBadgeCompact: {
-    paddingVertical: moderateScale(4),
-    paddingHorizontal: moderateScale(14),
-    borderRadius: moderateScale(12),
+  nameHeaderCompact: {
+    gap: 0,
   },
   nameText: {
     fontSize: moderateScale(22),
@@ -180,39 +181,46 @@ const styles = StyleSheet.create({
     color: GameColors.textMuted,
     marginTop: 2,
   },
-  moodLabel: {
-    fontSize: moderateScale(16),
-    fontWeight: "600",
-    color: GameColors.secondary,
+  petColumnMeasure: {
+    width: "100%",
   },
-  moodLabelCompact: {
-    fontSize: moderateScale(14),
+  petColumn: {
+    width: "100%",
+    alignItems: "center",
+    gap: moderateScale(8),
+  },
+  petColumnCompact: {
+    alignSelf: "center",
+    gap: moderateScale(6),
   },
   avatarWrap: {
-    minHeight: moderateScale(200),
+    minHeight: moderateScale(120),
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: moderateScale(8),
     width: "100%",
-    backgroundColor: GameColors.petVideoBg,
-    borderRadius: moderateScale(12),
+    position: "relative",
   },
   avatarWrapCompact: {
-    flex: 1,
-    minHeight: moderateScale(80),
-    paddingVertical: moderateScale(4),
-    width: "100%",
-    backgroundColor: GameColors.petVideoBg,
-    borderRadius: moderateScale(12),
+    flexGrow: 0,
+    minHeight: 0,
+    justifyContent: "flex-start",
+  },
+  avatarCluster: {
+    position: "relative",
+    alignItems: "center",
+  },
+  speechAnchor: {
+    position: "absolute",
+    bottom: "76%",
+    right: moderateScale(40),
+    zIndex: 2,
   },
   stats: {
     width: "100%",
     gap: moderateScale(12),
-    marginTop: moderateScale(4),
   },
   statsCompact: {
-    gap: moderateScale(8),
-    marginTop: 0,
+    gap: moderateScale(6),
   },
   statRow: {
     flexDirection: "row",

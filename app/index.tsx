@@ -1,14 +1,17 @@
 import { GameHeaderStats } from "@/components/economy/GameHeaderStats";
 import { PetStage } from "@/components/pet/PetStage";
+import { PuzzleStreakBanner } from "@/components/pet/PuzzleStreakBanner";
 import {
   FEED_COST,
   FEED_HAPPINESS_BOOST,
   FEED_HUNGER_RESTORE,
   GameColors,
   PET_HAPPINESS_BOOST,
+  PUZZLE_STREAK_NOTIFY_MIN,
 } from "@/constants/game";
 import { pickRandomExcitedMood } from "@/constants/pet-videos";
 import { useGame } from "@/contexts/GameProvider";
+import { useLocale } from "@/contexts/LocaleProvider";
 import { shouldPetSleep } from "@/hooks/use-pet-mood";
 import { usePetPlayback } from "@/hooks/use-pet-playback";
 import type { PetStats } from "@/types/game";
@@ -19,10 +22,14 @@ import {
   isHungerMax,
   withPetCareUpdate,
 } from "@/utils/pet-care";
+import {
+  getIdleSpeech,
+  pickPetTapSpeechKey,
+} from "@/utils/pet-speech";
 import { moderateScale } from "@/utils/scale";
 import * as Haptics from "expo-haptics";
 import { Redirect, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -43,6 +50,7 @@ function triggerHaptic() {
 export default function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { locale } = useLocale();
   const {
     isReady,
     hasCompletedOnboarding,
@@ -53,11 +61,11 @@ export default function HomeScreen() {
     setWallet,
     recordInteraction,
   } = useGame();
-  const [message, setMessage] = useState<string | null>(null);
+  const [actionSpeech, setActionSpeech] = useState<string | null>(null);
+  const speechTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     playback,
-    displayLabel,
     baseVideoMood,
     playAction,
     handleSegmentComplete,
@@ -66,17 +74,48 @@ export default function HomeScreen() {
     beginCareAction,
   } = usePetPlayback(pet);
 
-  const showMessage = useCallback((text: string) => {
-    setMessage(text);
-    setTimeout(() => setMessage(null), 2500);
+  const showSpeech = useCallback((text: string, durationMs = 2800) => {
+    if (speechTimerRef.current) {
+      clearTimeout(speechTimerRef.current);
+    }
+    setActionSpeech(text);
+    speechTimerRef.current = setTimeout(() => {
+      setActionSpeech(null);
+      speechTimerRef.current = null;
+    }, durationMs);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (speechTimerRef.current) {
+        clearTimeout(speechTimerRef.current);
+      }
+    };
+  }, []);
+
+  const idleSpeech = useMemo(() => {
+    const { key, params } = getIdleSpeech({
+      pet,
+      mood: baseVideoMood,
+      locale,
+      puzzlesSolved: progress.puzzlesSolved,
+      puzzleStreak: progress.puzzleStreak,
+    });
+    return t(key, { name: pet.name, ...params });
+  }, [baseVideoMood, locale, pet, progress.puzzleStreak, progress.puzzlesSolved, t]);
+
+  const showPuzzleStreak =
+    progress.puzzleStreak >= PUZZLE_STREAK_NOTIFY_MIN &&
+    actionSpeech === null;
+
+  const speechMessage = actionSpeech ?? idleSpeech;
 
   const rejectCareAction = useCallback(
     (text: string) => {
       triggerHaptic();
-      showMessage(text);
+      showSpeech(text);
     },
-    [showMessage],
+    [showSpeech],
   );
 
   const playActionMood = useCallback(
@@ -106,6 +145,7 @@ export default function HomeScreen() {
 
     recordInteraction();
     playActionMood(wasAsleep, pickRandomExcitedMood());
+    showSpeech(t(pickPetTapSpeechKey(), { name: pet.name }));
     wakePet((stats) => ({
       ...stats,
       happiness: isHappinessMax(stats)
@@ -117,6 +157,8 @@ export default function HomeScreen() {
     pet.isAsleep,
     playActionMood,
     recordInteraction,
+    showSpeech,
+    t,
     wakePet,
   ]);
 
@@ -154,7 +196,7 @@ export default function HomeScreen() {
         : clampStat(stats.happiness + FEED_HAPPINESS_BOOST),
     }));
     playActionMood(wasAsleep, "eating");
-    showMessage(t("home.enjoyedSnack", { name: pet.name }));
+    showSpeech(t("home.enjoyedSnack", { name: pet.name }));
   }, [
     beginCareAction,
     isCareAnimationPlaying,
@@ -166,7 +208,7 @@ export default function HomeScreen() {
     recordInteraction,
     rejectCareAction,
     setWallet,
-    showMessage,
+    showSpeech,
     t,
     wakePet,
     wallet.coins,
@@ -243,19 +285,18 @@ export default function HomeScreen() {
             compact
             name={pet.name}
             stats={pet.stats}
-            moodLabel={displayLabel}
+            speechMessage={speechMessage}
             playback={playback}
             onPetPress={petAnimating ? undefined : handlePetTap}
             onAnimationComplete={handleAnimationComplete}
           />
-          {message && (
-            <View style={styles.messageToast}>
-              <Text style={styles.messageText}>{message}</Text>
-            </View>
-          )}
         </View>
 
         <View style={styles.footer}>
+          {showPuzzleStreak ? (
+            <PuzzleStreakBanner count={progress.puzzleStreak} />
+          ) : null}
+
           <View style={styles.actions}>
             <Pressable
               style={[
@@ -355,25 +396,6 @@ const styles = StyleSheet.create({
   stageWrap: {
     flex: 1,
     minHeight: 0,
-  },
-  messageToast: {
-    position: "absolute",
-    bottom: moderateScale(12),
-    left: moderateScale(12),
-    right: moderateScale(12),
-    backgroundColor: GameColors.card,
-    borderRadius: moderateScale(12),
-    paddingVertical: moderateScale(8),
-    paddingHorizontal: moderateScale(12),
-    borderWidth: 2,
-    borderColor: GameColors.secondary,
-    zIndex: 10,
-  },
-  messageText: {
-    fontSize: moderateScale(14),
-    fontWeight: "600",
-    color: GameColors.text,
-    textAlign: "center",
   },
   footer: {
     gap: moderateScale(10),

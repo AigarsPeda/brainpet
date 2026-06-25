@@ -37,6 +37,7 @@ export const DEFAULT_PET = {
 export const DEFAULT_WALLET = { coins: 42 };
 export const DEFAULT_PROGRESS = {
   streak: 0,
+  puzzleStreak: 0,
   puzzlesSolved: { easy: 0, medium: 0, hard: 0 },
   lives: { current: 5, nextRegenAt: null },
   visualHelpsUnlocked: [] as string[],
@@ -79,6 +80,12 @@ export const PUZZLE_REPLAY_HAPPINESS_BOOST = 2;
 export const PUZZLE_WRONG_HAPPINESS_PENALTY = 4;
 /** Hunger spent per puzzle attempt (thinking makes them peckish). */
 export const PUZZLE_HUNGER_COST = 2;
+
+/** Show hungry speech when fullness is at or below this (0–100). */
+export const HUNGER_SPEECH_FULLNESS_MAX = 30;
+
+/** Show streak celebration speech and banner from this many correct answers in a row. */
+export const PUZZLE_STREAK_NOTIFY_MIN = 2;
 
 /** Stat decay while the app is closed or idle (per hour). */
 export const HUNGER_DECAY_PER_HOUR = 5;

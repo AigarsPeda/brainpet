@@ -51,6 +51,8 @@ export type LivesState = {
 
 export type Progress = {
   streak: number;
+  /** Consecutive puzzle answers answered correctly (resets on a wrong answer). */
+  puzzleStreak: number;
   puzzlesSolved: PuzzleProgress;
   lives: LivesState;
   /** Puzzle ids with a permanently unlocked visual help. */

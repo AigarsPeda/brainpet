@@ -2,6 +2,7 @@ import {
   HAPPINESS_DECAY_LOW_HUNGER_PER_HOUR,
   HAPPINESS_DECAY_PER_HOUR,
   HUNGER_DECAY_PER_HOUR,
+  HUNGER_SPEECH_FULLNESS_MAX,
   LOW_HUNGER_THRESHOLD,
 } from "@/constants/game";
 import type { PetProfile, PetStats } from "@/types/game";
@@ -21,9 +22,9 @@ export function isHungerMax(stats: PetStats): boolean {
   return stats.hunger >= 100;
 }
 
-/** Player-facing hunger (0 = satisfied, 100 = very hungry). Inverse of the fullness stat. */
-export function getHungerDisplayPercent(stats: PetStats): number {
-  return clampStat(100 - stats.hunger);
+/** True when the pet needs food (fullness is low). */
+export function isPetHungry(stats: PetStats): boolean {
+  return stats.hunger <= HUNGER_SPEECH_FULLNESS_MAX;
 }
 
 /** Feed has an effect unless hunger is already full (asleep pets can always be woken). */

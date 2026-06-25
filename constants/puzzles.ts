@@ -77,6 +77,15 @@ export function isDifficultyComplete(
   return puzzlesSolved[difficulty] >= total;
 }
 
+export function hasIncompletePuzzles(
+  locale: AppLocale,
+  puzzlesSolved: PuzzleProgress,
+): boolean {
+  return PUZZLE_DIFFICULTIES.some(
+    (difficulty) => !isDifficultyComplete(locale, difficulty, puzzlesSolved),
+  );
+}
+
 /** First difficulty after `after` that still has unsolved puzzles, if any. */
 export function getNextIncompleteDifficulty(
   locale: AppLocale,

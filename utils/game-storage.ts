@@ -140,6 +140,10 @@ function parseGameSave(
         pet,
         progress: {
           ...(parsed.progress as Progress),
+          puzzleStreak:
+            typeof parsed.progress.puzzleStreak === "number"
+              ? parsed.progress.puzzleStreak
+              : 0,
           puzzlesSolved,
           lives,
           visualHelpsUnlocked,

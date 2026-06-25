@@ -174,58 +174,63 @@ export function progressForVisualHelpStep(
   return clampedIndex / (stepCount - 1);
 }
 
-function kf(
-  at: number,
-  puzzleKey: string,
-  step: number,
-  scene: VisualScene,
-): VisualKeyframe {
-  return {
-    at,
-    captionKey: `visualHelp.${puzzleKey}.s${step}`,
-    scene,
-  };
+type KeyframeInput = {
+  puzzleKey: string;
+  scene: VisualScene;
+};
+
+function kf(puzzleKey: string, scene: VisualScene): KeyframeInput {
+  return { puzzleKey, scene };
+}
+
+function buildKeyframes(inputs: KeyframeInput[]): VisualKeyframe[] {
+  const count = inputs.length;
+  return inputs.map((input, index) => ({
+    at: count <= 1 ? 0 : index / (count - 1),
+    captionKey: `visualHelp.${input.puzzleKey}.s${index}`,
+    scene: input.scene,
+  }));
 }
 
 const VISUAL_EXPLANATIONS: Record<string, VisualExplanation> = {
   "easy-01": {
     puzzleId: "easy-01",
-    keyframes: [
-      kf(0, "easy01", 0, { kind: "items", emoji: "🍎", count: 12 }),
-      kf(0.45, "easy01", 1, {
+    keyframes: buildKeyframes([
+      kf("easy01", { kind: "items", emoji: "🍎", count: 12 }),
+      kf("easy01", {
         kind: "items",
         emoji: "🍎",
         count: 12,
         removed: 4,
       }),
-      kf(1, "easy01", 2, {
+      kf("easy01", {
         kind: "equation",
         lines: ["12 − 4 = ?", "Count what is left!"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "easy-02": {
     puzzleId: "easy-02",
-    keyframes: [
-      kf(0, "easy02", 0, { kind: "items", emoji: "🐑", count: 17 }),
-      kf(0.55, "easy02", 1, {
+    keyframes: buildKeyframes([
+      kf("easy02", { kind: "items", emoji: "🐑", count: 17 }),
+      kf("easy02", {
         kind: "items",
         emoji: "🐑",
         count: 17,
         removed: 8,
       }),
-      kf(1, "easy02", 2, {
+      kf("easy02", {
         kind: "equation",
         lines: ['"All but 9" ran away', "How many stayed? 🐑"],
         highlightLine: 1,
       }),
-    ],
+    ]),
   },
   "easy-03": {
     puzzleId: "easy-03",
-    keyframes: [
-      kf(0, "easy03", 0, {
+    keyframes: buildKeyframes([
+      kf("easy03", {
         kind: "groups",
         emoji: "🎈",
         groups: [
@@ -233,98 +238,98 @@ const VISUAL_EXPLANATIONS: Record<string, VisualExplanation> = {
           { count: 3, color: "#4ECDC4" },
         ],
       }),
-      kf(0.55, "easy03", 1, {
+      kf("easy03", {
         kind: "compare",
         left: { emoji: "🔴", count: 5 },
         right: { emoji: "🔵", count: 3 },
         operator: "+",
       }),
-      kf(1, "easy03", 2, {
+      kf("easy03", {
         kind: "equation",
         lines: ["5 + 3 = ?", "Put both groups together!"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "easy-04": {
     puzzleId: "easy-04",
-    keyframes: [
-      kf(0, "easy04", 0, {
+    keyframes: buildKeyframes([
+      kf("easy04", {
         kind: "sequence",
         values: [2, 4, 6, 8, "?"],
         jumpLabel: "+2",
       }),
-      kf(0.55, "easy04", 1, {
+      kf("easy04", {
         kind: "sequence",
         values: [2, 4, 6, 8, "?"],
         highlightIndex: 3,
         jumpLabel: "+2",
       }),
-      kf(1, "easy04", 2, {
+      kf("easy04", {
         kind: "equation",
         lines: ["8 + 2 = ?", "What comes next?"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "easy-05": {
     puzzleId: "easy-05",
-    keyframes: [
-      kf(0, "easy05", 0, { kind: "items", emoji: "🍪", count: 10 }),
-      kf(0.55, "easy05", 1, {
+    keyframes: buildKeyframes([
+      kf("easy05", { kind: "items", emoji: "🍪", count: 10 }),
+      kf("easy05", {
         kind: "items",
         emoji: "🍪",
         count: 10,
         removed: 3,
       }),
-      kf(1, "easy05", 2, {
+      kf("easy05", {
         kind: "equation",
         lines: ["10 − 3 = ?", "Count the cookies left!"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "easy-06": {
     puzzleId: "easy-06",
-    keyframes: [
-      kf(0, "easy06", 0, { kind: "grid", rows: 2, cols: 4, filled: 0 }),
-      kf(0.45, "easy06", 1, { kind: "grid", rows: 2, cols: 4, filled: 4 }),
-      kf(1, "easy06", 2, {
+    keyframes: buildKeyframes([
+      kf("easy06", { kind: "grid", rows: 2, cols: 4, filled: 0 }),
+      kf("easy06", { kind: "grid", rows: 2, cols: 4, filled: 4 }),
+      kf("easy06", {
         kind: "equation",
         lines: ["2 rows × 4 toys", "2 × 4 = ? 🧸"],
         highlightLine: 1,
       }),
-    ],
+    ]),
   },
   "easy-07": {
     puzzleId: "easy-07",
-    keyframes: [
-      kf(0, "easy07", 0, {
+    keyframes: buildKeyframes([
+      kf("easy07", {
         kind: "sequence",
         values: [11, 12, 13, 14],
       }),
-      kf(0.55, "easy07", 1, {
+      kf("easy07", {
         kind: "sequence",
         values: [11, 12, 13, 14],
         highlightIndex: 0,
       }),
-      kf(1, "easy07", 2, {
+      kf("easy07", {
         kind: "equation",
         lines: ["Odd numbers: 11, 13", "Which one fits?"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "easy-08": {
     puzzleId: "easy-08",
-    keyframes: [
-      kf(0, "easy08", 0, {
+    keyframes: buildKeyframes([
+      kf("easy08", {
         kind: "compare",
         left: { emoji: "🐚", count: 6 },
         right: { emoji: "🐚", count: 4 },
         operator: "+",
       }),
-      kf(0.55, "easy08", 1, {
+      kf("easy08", {
         kind: "groups",
         emoji: "🐚",
         groups: [
@@ -332,130 +337,130 @@ const VISUAL_EXPLANATIONS: Record<string, VisualExplanation> = {
           { count: 4, color: "#4ECDC4" },
         ],
       }),
-      kf(1, "easy08", 2, {
+      kf("easy08", {
         kind: "equation",
         lines: ["6 + 4 = ?", "Add both piles together!"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "medium-01": {
     puzzleId: "medium-01",
-    keyframes: [
-      kf(0, "medium01", 0, { kind: "grid", rows: 4, cols: 6, filled: 0 }),
-      kf(0.55, "medium01", 1, { kind: "grid", rows: 4, cols: 6, filled: 12 }),
-      kf(1, "medium01", 2, {
+    keyframes: buildKeyframes([
+      kf("medium01", { kind: "grid", rows: 4, cols: 6, filled: 0 }),
+      kf("medium01", { kind: "grid", rows: 4, cols: 6, filled: 12 }),
+      kf("medium01", {
         kind: "equation",
         lines: ["4 packs × 6 muffins", "4 × 6 = ? 🧁"],
         highlightLine: 1,
       }),
-    ],
+    ]),
   },
   "medium-02": {
     puzzleId: "medium-02",
-    keyframes: [
-      kf(0, "medium02", 0, {
+    keyframes: buildKeyframes([
+      kf("medium02", {
         kind: "equation",
         lines: ["$35 in wallet 💵"],
       }),
-      kf(0.55, "medium02", 1, {
+      kf("medium02", {
         kind: "compare",
         left: { emoji: "💵", count: 35, label: "start" },
         right: { emoji: "📚", count: 18, label: "book" },
         operator: "−",
       }),
-      kf(1, "medium02", 2, {
+      kf("medium02", {
         kind: "equation",
         lines: ["$35 − $18 = ?", "How much is left?"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "medium-03": {
     puzzleId: "medium-03",
-    keyframes: [
-      kf(0, "medium03", 0, {
+    keyframes: buildKeyframes([
+      kf("medium03", {
         kind: "sequence",
         values: [3, 6, 12, 24, "?"],
         jumpLabel: "×2",
       }),
-      kf(0.55, "medium03", 1, {
+      kf("medium03", {
         kind: "sequence",
         values: [3, 6, 12, 24, "?"],
         highlightIndex: 3,
         jumpLabel: "×2",
       }),
-      kf(1, "medium03", 2, {
+      kf("medium03", {
         kind: "equation",
         lines: ["24 × 2 = ?", "Double 24!"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "medium-04": {
     puzzleId: "medium-04",
-    keyframes: [
-      kf(0, "medium04", 0, {
+    keyframes: buildKeyframes([
+      kf("medium04", {
         kind: "items",
         emoji: "👧",
         count: 28,
         maxVisible: 14,
       }),
-      kf(0.55, "medium04", 1, {
+      kf("medium04", {
         kind: "grid",
         rows: 4,
         cols: 7,
         filled: 28,
       }),
-      kf(1, "medium04", 2, {
+      kf("medium04", {
         kind: "equation",
         lines: ["28 ÷ 4 teams = ?", "How many per team? 👧"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "medium-05": {
     puzzleId: "medium-05",
-    keyframes: [
-      kf(0, "medium05", 0, { kind: "grid", rows: 3, cols: 5, filled: 15 }),
-      kf(0.55, "medium05", 1, { kind: "items", emoji: "🔵", count: 4 }),
-      kf(1, "medium05", 2, {
+    keyframes: buildKeyframes([
+      kf("medium05", { kind: "grid", rows: 3, cols: 5, filled: 15 }),
+      kf("medium05", { kind: "items", emoji: "🔵", count: 4 }),
+      kf("medium05", {
         kind: "equation",
         lines: ["3 × 5 = 15", "15 + 4 = ? 🔵"],
         highlightLine: 1,
       }),
-    ],
+    ]),
   },
   "medium-06": {
     puzzleId: "medium-06",
-    keyframes: [
-      kf(0, "medium06", 0, {
+    keyframes: buildKeyframes([
+      kf("medium06", {
         kind: "equation",
         lines: ["Tens digit = 4", "Ones digit = 2 × 4"],
       }),
-      kf(0.55, "medium06", 1, {
+      kf("medium06", {
         kind: "sequence",
         values: [4, 8],
         highlightIndex: 1,
       }),
-      kf(1, "medium06", 2, {
+      kf("medium06", {
         kind: "equation",
         lines: ["4 and 8 → ?", "Put the digits together!"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "hard-01": {
     puzzleId: "hard-01",
-    keyframes: [
-      kf(0, "hard01", 0, {
+    keyframes: buildKeyframes([
+      kf("hard01", {
         kind: "grid",
         rows: 2,
         cols: 4,
         filled: 8,
         emoji: "🍕",
       }),
-      kf(0.25, "hard01", 1, {
+      kf("hard01", {
         kind: "groups",
         emoji: "🍕",
         groups: [
@@ -463,115 +468,170 @@ const VISUAL_EXPLANATIONS: Record<string, VisualExplanation> = {
           { count: 2, color: "#4ECDC4" },
         ],
       }),
-      kf(0.5, "hard01", 2, {
+      kf("hard01", {
         kind: "compare",
         left: { emoji: "🍕", count: 3, label: "you" },
         right: { emoji: "🍕", count: 2, label: "friend" },
         operator: "+",
       }),
-      kf(0.75, "hard01", 3, {
+      kf("hard01", {
         kind: "grid",
         rows: 2,
         cols: 4,
         filled: 3,
         emoji: "🍕",
       }),
-      kf(1, "hard01", 4, {
+      kf("hard01", {
         kind: "equation",
-        lines: ["3 + 2 = 5 eaten", "8 − 5 = 3 left", "Fraction: 3 out of 8 → ?/8"],
+        lines: [
+          "3 + 2 = 5 eaten",
+          "8 − 5 = 3 left",
+          "Fraction: 3 out of 8 → ?/8",
+        ],
         highlightLine: 2,
       }),
-    ],
+    ]),
   },
   "hard-02": {
     puzzleId: "hard-02",
-    keyframes: [
-      kf(0, "hard02", 0, {
+    keyframes: buildKeyframes([
+      kf("hard02", {
         kind: "compare",
         left: { emoji: "🚂", count: 60, label: "mi" },
         right: { emoji: "⏱️", count: 2, label: "hr" },
         operator: "÷",
       }),
-      kf(0.55, "hard02", 1, {
+      kf("hard02", {
         kind: "equation",
         lines: ["60 ÷ 2 = ? mph", "Find the speed first!"],
         highlightLine: 0,
       }),
-      kf(1, "hard02", 2, {
+      kf("hard02", {
         kind: "equation",
         lines: ["? × 5 hours", "How far in 5 hours? 🚂"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "hard-03": {
     puzzleId: "hard-03",
-    keyframes: [
-      kf(0, "hard03", 0, {
+    keyframes: buildKeyframes([
+      kf("hard03", {
         kind: "equation",
-        lines: ["Toy costs $40 🧸"],
+        lines: ["Toy price: $40 🧸"],
       }),
-      kf(0.55, "hard03", 1, {
+      kf("hard03", {
+        kind: "equation",
+        lines: ["Markup = 25% of $40", "25% → 25 out of every 100"],
+        highlightLine: 0,
+      }),
+      kf("hard03", {
+        kind: "sequence",
+        values: [10, 10, 10, 10],
+        highlightIndex: 0,
+        jumpLabel: "$40 ÷ 4",
+      }),
+      kf("hard03", {
+        kind: "equation",
+        lines: ["$40 ÷ 4 = $10", "25% markup = $10"],
+        highlightLine: 0,
+      }),
+      kf("hard03", {
         kind: "compare",
         left: { emoji: "🧸", count: 40 },
         right: { emoji: "📈", count: 10 },
         operator: "+",
       }),
-      kf(1, "hard03", 2, {
+      kf("hard03", {
         kind: "equation",
-        lines: ["25% of $40 = $10", "New price = ?"],
-        highlightLine: 1,
+        lines: ["$40 + $10 = ?", "New price — your turn!"],
+        highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "hard-04": {
     puzzleId: "hard-04",
-    keyframes: [
-      kf(0, "hard04", 0, {
+    keyframes: buildKeyframes([
+      kf("hard04", {
         kind: "sequence",
         values: [1, 1, 2, 3, 5, 8, "?"],
       }),
-      kf(0.55, "hard04", 1, {
+      kf("hard04", {
         kind: "sequence",
         values: [1, 1, 2, 3, 5, 8, "?"],
+        addendIndices: [0, 1],
+        highlightIndex: 2,
+        jumpLabel: "1 + 1",
+      }),
+      kf("hard04", {
+        kind: "sequence",
+        values: [1, 1, 2, 3, 5, 8, "?"],
+        addendIndices: [1, 2],
+        highlightIndex: 3,
+        jumpLabel: "1 + 2",
+      }),
+      kf("hard04", {
+        kind: "sequence",
+        values: [1, 1, 2, 3, 5, 8, "?"],
+        addendIndices: [2, 3],
+        highlightIndex: 4,
+        jumpLabel: "2 + 3",
+      }),
+      kf("hard04", {
+        kind: "sequence",
+        values: [1, 1, 2, 3, 5, 8, "?"],
+        addendIndices: [3, 4],
         highlightIndex: 5,
-        jumpLabel: "5+8",
+        jumpLabel: "3 + 5",
       }),
-      kf(1, "hard04", 2, {
+      kf("hard04", {
+        kind: "sequence",
+        values: [1, 1, 2, 3, 5, 8, "?"],
+        addendIndices: [4, 5],
+        highlightIndex: 6,
+        jumpLabel: "5 + 8",
+      }),
+      kf("hard04", {
         kind: "equation",
         lines: ["5 + 8 = ?", "Add the last two numbers!"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "hard-05": {
     puzzleId: "hard-05",
-    keyframes: [
-      kf(0, "hard05", 0, { kind: "grid", rows: 4, cols: 6, filled: 24 }),
-      kf(0.35, "hard05", 1, {
+    keyframes: buildKeyframes([
+      kf("hard05", {
+        kind: "grid",
+        rows: 4,
+        cols: 6,
+        filled: 24,
+        emoji: "🍪",
+      }),
+      kf("hard05", {
         kind: "items",
         emoji: "🍪",
         count: 24,
         removed: 5,
       }),
-      kf(0.7, "hard05", 2, {
+      kf("hard05", {
         kind: "items",
         emoji: "🍪",
         count: 24,
         removed: 12,
       }),
-      kf(1, "hard05", 3, {
+      kf("hard05", {
         kind: "equation",
         lines: ["24 − 5 − 7 = ?", "Count what is left!"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
   "hard-06": {
     puzzleId: "hard-06",
-    keyframes: [
-      kf(0, "hard06", 0, { kind: "items", emoji: "🍎", count: 5 }),
-      kf(0.55, "hard06", 1, {
+    keyframes: buildKeyframes([
+      kf("hard06", { kind: "items", emoji: "🍎", count: 5 }),
+      kf("hard06", {
         kind: "groups",
         emoji: "🍎",
         groups: [
@@ -580,11 +640,11 @@ const VISUAL_EXPLANATIONS: Record<string, VisualExplanation> = {
           { count: 1, color: "#F7B731" },
         ],
       }),
-      kf(1, "hard06", 2, {
+      kf("hard06", {
         kind: "equation",
         lines: ["5 ÷ 3 friends = ?", "How many each? Any left? 🍎"],
         highlightLine: 0,
       }),
-    ],
+    ]),
   },
 };

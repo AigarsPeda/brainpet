@@ -21,6 +21,8 @@ export type VisualScene =
   | {
       kind: "sequence";
       values: (number | "?" | null)[];
+      /** The two numbers being added together. */
+      addendIndices?: [number, number];
       highlightIndex?: number;
       jumpLabel?: string;
     }

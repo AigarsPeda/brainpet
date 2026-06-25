@@ -56,10 +56,9 @@ export function derivePetMood(pet: PetProfile, now = Date.now()): PetMood {
     return "sleeping";
   }
 
-  if (
-    stats.hunger < LOW_STAT_THRESHOLD ||
-    stats.happiness < LOW_STAT_THRESHOLD
-  ) {
+  // Sad / crying only reflects low happiness. Hunger is shown on the stat bar;
+  // stats.hunger is fullness (low = needs food), not mood.
+  if (stats.happiness < LOW_STAT_THRESHOLD) {
     return "sad";
   }
 

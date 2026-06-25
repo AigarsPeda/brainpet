@@ -8,27 +8,27 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type VisualHelpSheetProps = {
-  visible: boolean;
-  puzzleId: string;
   cost: number;
   coins: number;
+  visible: boolean;
+  puzzleId: string;
   unlocked: boolean;
-  onPurchase: () => boolean;
   onClose: () => void;
+  onPurchase: () => boolean;
 };
 
 export function VisualHelpSheet({
-  visible,
-  puzzleId,
   cost,
   coins,
+  visible,
+  puzzleId,
   unlocked,
-  onPurchase,
   onClose,
+  onPurchase,
 }: VisualHelpSheetProps) {
   const { t } = useTranslation();
-  const explanation = getVisualExplanation(puzzleId);
   const [progress, setProgress] = useState(0);
+  const explanation = getVisualExplanation(puzzleId);
   const [isUnlocked, setIsUnlocked] = useState(unlocked);
 
   useEffect(() => {
@@ -113,87 +113,87 @@ export function VisualHelpSheet({
 
 const styles = StyleSheet.create({
   card: {
-    paddingTop: moderateScale(20),
-    paddingHorizontal: moderateScale(20),
     alignItems: "center",
     gap: moderateScale(10),
+    paddingTop: moderateScale(20),
+    paddingHorizontal: moderateScale(20),
   },
   emoji: {
     fontSize: moderateScale(36),
   },
   title: {
-    fontSize: moderateScale(22),
     fontWeight: "800",
-    color: GameColors.text,
     textAlign: "center",
+    color: GameColors.text,
+    fontSize: moderateScale(22),
   },
   subtitle: {
-    fontSize: moderateScale(14),
     fontWeight: "500",
-    color: GameColors.textMuted,
     textAlign: "center",
+    fontSize: moderateScale(14),
+    color: GameColors.textMuted,
     lineHeight: moderateScale(20),
   },
   lockCard: {
     width: "100%",
     alignItems: "center",
     gap: moderateScale(8),
-    backgroundColor: GameColors.background,
-    borderRadius: moderateScale(16),
     padding: moderateScale(20),
+    borderRadius: moderateScale(16),
+    backgroundColor: GameColors.background,
   },
   lockEmoji: {
     fontSize: moderateScale(40),
   },
   lockText: {
-    fontSize: moderateScale(15),
     fontWeight: "600",
-    color: GameColors.text,
     textAlign: "center",
+    color: GameColors.text,
+    fontSize: moderateScale(15),
     lineHeight: moderateScale(22),
   },
   lockPrice: {
-    fontSize: moderateScale(18),
     fontWeight: "800",
     color: GameColors.coinText,
+    fontSize: moderateScale(18),
   },
   buyBtn: {
     width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
     minHeight: moderateScale(52),
     borderRadius: moderateScale(16),
     backgroundColor: GameColors.primary,
-    alignItems: "center",
-    justifyContent: "center",
   },
   buyBtnText: {
-    fontSize: moderateScale(17),
-    fontWeight: "800",
     color: "#FFFFFF",
+    fontWeight: "800",
+    fontSize: moderateScale(17),
   },
   cantBuy: {
-    fontSize: moderateScale(14),
     fontWeight: "600",
-    color: GameColors.textMuted,
     textAlign: "center",
+    fontSize: moderateScale(14),
+    color: GameColors.textMuted,
   },
   closeBtn: {
     width: "100%",
-    minHeight: moderateScale(48),
-    borderRadius: moderateScale(14),
     alignItems: "center",
     justifyContent: "center",
     marginTop: moderateScale(4),
+    minHeight: moderateScale(48),
+    borderRadius: moderateScale(14),
   },
   closeBtnPrimary: {
     backgroundColor: GameColors.primary,
   },
   closeBtnText: {
-    fontSize: moderateScale(16),
     fontWeight: "700",
+    fontSize: moderateScale(16),
     color: GameColors.textMuted,
   },
   closeBtnTextPrimary: {
-    fontWeight: "800",
     color: "#FFFFFF",
+    fontWeight: "800",
   },
 });

@@ -64,7 +64,12 @@ export function VisualExplanationPlayer({
     [explanation.keyframes, progress],
   );
 
-  const showTransition = frameBlend.blend > 0.01 && frameBlend.blend < 0.99;
+  const sameSceneKind =
+    frameBlend.from.scene.kind === frameBlend.to.scene.kind;
+  const showTransition =
+    sameSceneKind && frameBlend.blend > 0.01 && frameBlend.blend < 0.99;
+  const snappedScene =
+    frameBlend.blend >= 0.5 ? frameBlend.to.scene : frameBlend.from.scene;
   const outgoingOpacity = showTransition
     ? 1 - frameBlend.blend
     : frameBlend.blend < 0.5
@@ -100,12 +105,18 @@ export function VisualExplanationPlayer({
   return (
     <View style={styles.wrap}>
       <View style={styles.stageHost}>
-        <CrossfadeLayer opacity={outgoingOpacity} translateX={outgoingShift}>
-          <VisualExplanationScene scene={frameBlend.from.scene} />
-        </CrossfadeLayer>
-        <CrossfadeLayer opacity={incomingOpacity} translateX={incomingShift}>
-          <VisualExplanationScene scene={frameBlend.to.scene} />
-        </CrossfadeLayer>
+        {sameSceneKind ? (
+          <>
+            <CrossfadeLayer opacity={outgoingOpacity} translateX={outgoingShift}>
+              <VisualExplanationScene scene={frameBlend.from.scene} />
+            </CrossfadeLayer>
+            <CrossfadeLayer opacity={incomingOpacity} translateX={incomingShift}>
+              <VisualExplanationScene scene={frameBlend.to.scene} />
+            </CrossfadeLayer>
+          </>
+        ) : (
+          <VisualExplanationScene scene={snappedScene} />
+        )}
       </View>
 
       <View style={styles.captionHost}>
@@ -209,13 +220,15 @@ const styles = StyleSheet.create({
   },
   stageHost: {
     width: "100%",
-    minHeight: moderateScale(180),
+    height: moderateScale(196),
+    overflow: "hidden",
     position: "relative",
     justifyContent: "center",
   },
   layer: {
     ...StyleSheet.absoluteFill,
     justifyContent: "center",
+    alignItems: "center",
   },
   captionHost: {
     minHeight: moderateScale(48),

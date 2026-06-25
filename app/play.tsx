@@ -185,6 +185,10 @@ export default function PlayScreen() {
         triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
         setCoinsEarned(coinReward);
         setWallet((current) => ({ coins: current.coins + coinReward }));
+        setProgress((current) => ({
+          ...current,
+          puzzleStreak: current.puzzleStreak + 1,
+        }));
         setPet((current) =>
           withPetCareUpdate(current, (stats) => ({
             ...stats,
@@ -197,6 +201,7 @@ export default function PlayScreen() {
         setProgress((current) => ({
           ...current,
           lives: loseLife(current.lives),
+          puzzleStreak: 0,
         }));
         setPet((current) =>
           withPetCareUpdate(current, (stats) => ({

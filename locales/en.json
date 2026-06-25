@@ -27,6 +27,8 @@
     "feedCost": "{{cost}} 🪙",
     "solvePuzzle": "🥜 Solve a Puzzle",
     "solvePuzzleHint": "Earn coins for {{name}}",
+    "puzzleStreak_one": "{{count}} puzzle correct in a row!",
+    "puzzleStreak_other": "{{count}} puzzles correct in a row!",
     "giveMoment": "Give {{name}} a moment!",
     "notHungry": "{{name}} isn't hungry right now.",
     "needCoinsFeed": "Need {{cost}} coins to feed {{name}}!",
@@ -48,8 +50,22 @@
   },
   "pet": {
     "level": "Level {{level}}",
-    "hunger": "Hunger",
-    "happiness": "Happiness"
+    "fed": "Fed",
+    "happiness": "Happiness",
+    "speech": {
+      "idle": "I'm doing great!",
+      "happy": "So happy right now!",
+      "hungry": "My tummy is rumbling…",
+      "sad": "Could use a hug.",
+      "sleepy": "I'm getting sleepy…",
+      "sleeping": "Zzz…",
+      "solvePuzzles": "Let's solve a puzzle!",
+      "streak_one": "{{count}} in a row — amazing!",
+      "streak_other": "{{count}} in a row — keep going!",
+      "petTap1": "That tickles!",
+      "petTap2": "Hehe, again!",
+      "petTap3": "You're the best!"
+    }
   },
   "mood": {
     "idle": "Feeling good",

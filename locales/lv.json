@@ -27,6 +27,9 @@
     "feedCost": "{{cost}} 🪙",
     "solvePuzzle": "🥜 Atrisināt uzdevumu",
     "solvePuzzleHint": "Nopelni monētas {{name}}",
+    "puzzleStreak_zero": "{{count}} mīklas pēc kārtas pareizi!",
+    "puzzleStreak_one": "{{count}} mīkla pēc kārtas pareizi!",
+    "puzzleStreak_other": "{{count}} mīklas pēc kārtas pareizi!",
     "giveMoment": "Dod {{name}} brīdi!",
     "notHungry": "{{name}} tagad nav izsalcis.",
     "needCoinsFeed": "Vajag {{cost}} monētas, lai barotu {{name}}!",
@@ -48,8 +51,23 @@
   },
   "pet": {
     "level": "{{level}}. līmenis",
-    "hunger": "Izsalkums",
-    "happiness": "Laime"
+    "fed": "Paēdis",
+    "happiness": "Laime",
+    "speech": {
+      "idle": "Man iet lieliski!",
+      "happy": "Esmu tik laimīgs!",
+      "hungry": "Vēders rūc…",
+      "sad": "Vajag kādu pieskārienu.",
+      "sleepy": "Sāk gribēties gulēt…",
+      "sleeping": "Zzz…",
+      "solvePuzzles": "Aizrisināsim mīklu!",
+      "streak_zero": "{{count}} pēc kārtas — lieliski!",
+      "streak_one": "{{count}} pēc kārtas — lieliski!",
+      "streak_other": "{{count}} pēc kārtas — turpini!",
+      "petTap1": "Tas kutina!",
+      "petTap2": "Hehe, vēl!",
+      "petTap3": "Tu esi labākais!"
+    }
   },
   "mood": {
     "idle": "Jūtas labi",

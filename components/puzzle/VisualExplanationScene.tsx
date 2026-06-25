@@ -59,16 +59,17 @@ function GroupsScene({
             { borderLeftWidth: 3, borderLeftColor: group.color },
           ]}
         >
-          <View style={styles.groupItems}>
-            {Array.from({ length: Math.min(group.count, 8) }, (_, index) => (
-              <Text key={`g-${groupIndex}-${index}`} style={styles.itemEmoji}>
-                {emoji}
-              </Text>
-            ))}
-            {group.count > 8 ? (
-              <Text style={styles.groupCount}>×{group.count}</Text>
-            ) : null}
-          </View>
+          {group.count > 5 ? (
+            <Text style={styles.groupEmojiSingle}>{emoji}</Text>
+          ) : (
+            <View style={styles.groupItems}>
+              {Array.from({ length: group.count }, (_, index) => (
+                <Text key={`g-${groupIndex}-${index}`} style={styles.itemEmoji}>
+                  {emoji}
+                </Text>
+              ))}
+            </View>
+          )}
           <Text style={[styles.groupNumber, { color: group.color }]}>
             {group.count}
           </Text>
@@ -119,39 +120,50 @@ function NumberLineScene({
 
 function SequenceScene({
   values,
+  addendIndices,
   highlightIndex,
   jumpLabel,
 }: {
   values: (number | "?" | null)[];
+  addendIndices?: [number, number];
   highlightIndex?: number;
   jumpLabel?: string;
 }) {
+  const addendSet = new Set(addendIndices ?? []);
+
   return (
     <View style={styles.sequenceWrap}>
       {jumpLabel ? <Text style={styles.jumpLabel}>{jumpLabel}</Text> : null}
       <View style={styles.sequenceRow}>
-        {values.map((value, index) => (
-          <View key={`seq-${index}`} style={styles.sequenceCellWrap}>
-            <View
-              style={[
-                styles.sequenceCell,
-                highlightIndex === index && styles.sequenceCellHighlight,
-              ]}
-            >
-              <Text
+        {values.map((value, index) => {
+          const isAddend = addendSet.has(index);
+          const isResult = highlightIndex === index;
+
+          return (
+            <View key={`seq-${index}`} style={styles.sequenceCellWrap}>
+              <View
                 style={[
-                  styles.sequenceValue,
-                  highlightIndex === index && styles.sequenceValueHighlight,
+                  styles.sequenceCell,
+                  isAddend && styles.sequenceCellAddend,
+                  isResult && styles.sequenceCellHighlight,
                 ]}
               >
-                {value ?? "?"}
-              </Text>
+                <Text
+                  style={[
+                    styles.sequenceValue,
+                    isAddend && styles.sequenceValueAddend,
+                    isResult && styles.sequenceValueHighlight,
+                  ]}
+                >
+                  {value ?? "?"}
+                </Text>
+              </View>
+              {index < values.length - 1 ? (
+                <Text style={styles.sequenceArrow}>→</Text>
+              ) : null}
             </View>
-            {index < values.length - 1 ? (
-              <Text style={styles.sequenceArrow}>→</Text>
-            ) : null}
-          </View>
-        ))}
+          );
+        })}
       </View>
     </View>
   );
@@ -173,31 +185,47 @@ function GridScene({
     emoji === "🍕"
       ? `${filled} of ${total} slices left`
       : `${rows} × ${cols} = ${total}`;
+  const gap = moderateScale(6);
+  const maxGridWidth = moderateScale(252);
+  const cellSize = Math.min(
+    moderateScale(32),
+    Math.floor((maxGridWidth - gap * (cols - 1)) / cols),
+  );
+  const emojiSize = Math.max(moderateScale(16), Math.round(cellSize * 0.82));
 
   return (
-    <View style={styles.gridWrap}>
-      {Array.from({ length: total }, (_, index) => {
-        const isRemaining = index < filled;
-        return (
-          <View
-            key={`cell-${index}`}
-            style={[
-              styles.gridCell,
-              isRemaining && styles.gridCellFilled,
-              !isRemaining && styles.gridCellEaten,
-            ]}
-          >
-            <Text
-              style={[
-                styles.gridEmoji,
-                !isRemaining && styles.gridEmojiEaten,
-              ]}
-            >
-              {emoji}
-            </Text>
-          </View>
-        );
-      })}
+    <View style={styles.gridContainer}>
+      {Array.from({ length: rows }, (_, rowIndex) => (
+        <View key={`row-${rowIndex}`} style={[styles.gridRow, { gap }]}>
+          {Array.from({ length: cols }, (_, colIndex) => {
+            const index = rowIndex * cols + colIndex;
+            const isRemaining = index < filled;
+
+            return (
+              <View
+                key={`cell-${index}`}
+                style={[
+                  styles.gridCell,
+                  {
+                    width: cellSize,
+                    height: cellSize,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.gridEmoji,
+                    { fontSize: emojiSize },
+                    !isRemaining && styles.gridEmojiEaten,
+                  ]}
+                >
+                  {emoji}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      ))}
       <Text style={styles.gridLabel}>{gridLabel}</Text>
     </View>
   );
@@ -284,6 +312,7 @@ export function VisualExplanationScene({ scene }: VisualExplanationSceneProps) {
       {scene.kind === "sequence" ? (
         <SequenceScene
           values={scene.values}
+          addendIndices={scene.addendIndices}
           highlightIndex={scene.highlightIndex}
           jumpLabel={scene.jumpLabel}
         />
@@ -316,10 +345,12 @@ export function VisualExplanationScene({ scene }: VisualExplanationSceneProps) {
 
 const styles = StyleSheet.create({
   stage: {
-    minHeight: moderateScale(180),
+    minHeight: moderateScale(164),
+    maxHeight: moderateScale(180),
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
     backgroundColor: GameColors.background,
     borderRadius: moderateScale(16),
     padding: moderateScale(16),
@@ -371,10 +402,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     maxWidth: moderateScale(120),
   },
-  groupCount: {
-    fontSize: moderateScale(16),
-    fontWeight: "800",
-    color: GameColors.text,
+  groupEmojiSingle: {
+    fontSize: moderateScale(28),
   },
   groupNumber: {
     fontSize: moderateScale(24),
@@ -448,10 +477,17 @@ const styles = StyleSheet.create({
   sequenceCellHighlight: {
     backgroundColor: "#FFF0EE",
   },
+  sequenceCellAddend: {
+    backgroundColor: "#E8FAF8",
+  },
   sequenceValue: {
     fontSize: moderateScale(20),
     fontWeight: "800",
     color: GameColors.text,
+  },
+  sequenceValueAddend: {
+    color: GameColors.secondary,
+    fontSize: moderateScale(22),
   },
   sequenceValueHighlight: {
     color: GameColors.primary,
@@ -463,25 +499,19 @@ const styles = StyleSheet.create({
     color: GameColors.textMuted,
     marginHorizontal: moderateScale(2),
   },
-  gridWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: moderateScale(6),
-    maxWidth: moderateScale(260),
-  },
-  gridCell: {
-    width: moderateScale(36),
-    height: moderateScale(36),
-    borderRadius: moderateScale(8),
+  gridContainer: {
     alignItems: "center",
     justifyContent: "center",
+    gap: moderateScale(6),
+    width: "100%",
   },
-  gridCellFilled: {
-    backgroundColor: GameColors.card,
+  gridRow: {
+    flexDirection: "row",
+    justifyContent: "center",
   },
-  gridCellEaten: {
-    backgroundColor: "transparent",
+  gridCell: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   gridEmoji: {
     fontSize: moderateScale(18),
@@ -493,8 +523,8 @@ const styles = StyleSheet.create({
   gridLabel: {
     width: "100%",
     textAlign: "center",
-    marginTop: moderateScale(8),
-    fontSize: moderateScale(18),
+    marginTop: moderateScale(4),
+    fontSize: moderateScale(16),
     fontWeight: "800",
     color: GameColors.text,
   },
