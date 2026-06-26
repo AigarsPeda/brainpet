@@ -9,26 +9,26 @@ import { moderateScale } from "@/utils/scale";
 import { useMemo } from "react";
 
 type PetDisplayProps = {
-  petType: PetType;
-  playback?: PetPlaybackState;
-  /** Convenience — builds a single-segment playback from a mood. */
-  mood?: PetAnimationState;
   width?: number;
   loop?: boolean;
+  petType: PetType;
+  /** Convenience — builds a single-segment playback from a mood. */
+  mood?: PetAnimationState;
+  playback?: PetPlaybackState;
+  onPress?: () => void;
   onAnimationComplete?: () => void;
   onStepComplete?: (stepIndex: number) => void;
-  onPress?: () => void;
 };
 
 export function PetDisplay({
+  mood,
   petType,
   playback,
-  mood,
-  width = moderateScale(200),
-  loop = false,
-  onAnimationComplete,
-  onStepComplete,
   onPress,
+  onStepComplete,
+  onAnimationComplete,
+  loop = false,
+  width = moderateScale(200),
 }: PetDisplayProps) {
   const registry = getPetMediaRegistry(petType);
 
@@ -47,9 +47,9 @@ export function PetDisplay({
     if (resolvedPlayback.kind === "scenario") {
       return (
         <PetVideoRenderer
-          scenarioSteps={resolvedPlayback.steps}
-          size={width}
           loop={loop}
+          size={width}
+          scenarioSteps={resolvedPlayback.steps}
           onAnimationComplete={onAnimationComplete}
           onStepComplete={onStepComplete}
           onPress={onPress}
@@ -59,9 +59,9 @@ export function PetDisplay({
 
     return (
       <PetVideoRenderer
-        segment={resolvedPlayback.segment}
-        size={width}
         loop={loop}
+        size={width}
+        segment={resolvedPlayback.segment}
         onAnimationComplete={onAnimationComplete}
         onStepComplete={onStepComplete}
         onPress={onPress}
