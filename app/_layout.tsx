@@ -1,4 +1,5 @@
 import { ExpoUIHost } from "@/components/ui/ExpoUIHost";
+import { SplashGate } from "@/components/branding/SplashGate";
 import { GameProvider } from "@/contexts/GameProvider";
 import { LocaleProvider } from "@/contexts/LocaleProvider";
 import { PetDisplayProvider } from "@/pet-display/PetDisplayProvider";
@@ -21,38 +22,46 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <LocaleProvider>
         <GameProvider>
-        <PetDisplayProvider>
-          <ExpoUIHost>
-            <ThemeProvider
-              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-            >
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  animation: "slide_from_right",
-                  gestureEnabled: true,
-                  gestureDirection: "horizontal",
-                }}
-              >
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="puzzles" options={{ headerShown: false }} />
-                <Stack.Screen name="play" options={{ headerShown: false }} />
-                <Stack.Screen name="settings" options={{ headerShown: false }} />
-                <Stack.Screen name="store" options={{ headerShown: false }} />
-                <Stack.Screen
-                  name="onboarding/name-pet"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="modal"
-                  options={{ presentation: "modal", title: "Modal" }}
-                />
-              </Stack>
-              <StatusBar style="auto" />
-            </ThemeProvider>
-          </ExpoUIHost>
-        </PetDisplayProvider>
-      </GameProvider>
+          <SplashGate>
+            <PetDisplayProvider>
+              <ExpoUIHost>
+                <ThemeProvider
+                  value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+                >
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      animation: "slide_from_right",
+                      gestureEnabled: true,
+                      gestureDirection: "horizontal",
+                    }}
+                  >
+                    <Stack.Screen name="index" options={{ headerShown: false }} />
+                    <Stack.Screen
+                      name="puzzles"
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen name="play" options={{ headerShown: false }} />
+                    <Stack.Screen
+                      name="settings"
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen name="store" options={{ headerShown: false }} />
+                    <Stack.Screen
+                      name="onboarding/name-pet"
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="modal"
+                      options={{ presentation: "modal", title: "Modal" }}
+                    />
+                  </Stack>
+                  <StatusBar style="auto" />
+                </ThemeProvider>
+              </ExpoUIHost>
+            </PetDisplayProvider>
+          </SplashGate>
+        </GameProvider>
     </LocaleProvider>
     </GestureHandlerRootView>
   );
