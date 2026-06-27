@@ -1,3 +1,4 @@
+import { PetSpriteRenderer } from "@/pet-display/media/sprite/PetSpriteRenderer";
 import { PetVideoRenderer } from "@/pet-display/media/video/PetVideoRenderer";
 import { getPetMediaRegistry } from "@/pet-display/registry/dog-video-registry";
 import type {
@@ -11,6 +12,7 @@ import { useMemo } from "react";
 type PetDisplayProps = {
   width?: number;
   loop?: boolean;
+  transparentBackground?: boolean;
   petType: PetType;
   /** Convenience — builds a single-segment playback from a mood. */
   mood?: PetAnimationState;
@@ -28,6 +30,7 @@ export function PetDisplay({
   onStepComplete,
   onAnimationComplete,
   loop = false,
+  transparentBackground = false,
   width = moderateScale(200),
 }: PetDisplayProps) {
   const registry = getPetMediaRegistry(petType);
@@ -43,12 +46,13 @@ export function PetDisplay({
     };
   }, [mood, playback, registry]);
 
-  if (registry.mediaKind === "video") {
+  if (registry.mediaKind === "sprite") {
     if (resolvedPlayback.kind === "scenario") {
       return (
-        <PetVideoRenderer
+        <PetSpriteRenderer
           loop={loop}
           size={width}
+          transparentBackground={transparentBackground}
           scenarioSteps={resolvedPlayback.steps}
           onAnimationComplete={onAnimationComplete}
           onStepComplete={onStepComplete}
@@ -58,9 +62,10 @@ export function PetDisplay({
     }
 
     return (
-      <PetVideoRenderer
+      <PetSpriteRenderer
         loop={loop}
         size={width}
+        transparentBackground={transparentBackground}
         segment={resolvedPlayback.segment}
         onAnimationComplete={onAnimationComplete}
         onStepComplete={onStepComplete}
@@ -69,5 +74,29 @@ export function PetDisplay({
     );
   }
 
-  return null;
+  if (resolvedPlayback.kind === "scenario") {
+    return (
+      <PetVideoRenderer
+        loop={loop}
+        size={width}
+        transparentBackground={transparentBackground}
+        scenarioSteps={resolvedPlayback.steps}
+        onAnimationComplete={onAnimationComplete}
+        onStepComplete={onStepComplete}
+        onPress={onPress}
+      />
+    );
+  }
+
+  return (
+    <PetVideoRenderer
+      loop={loop}
+      size={width}
+      transparentBackground={transparentBackground}
+      segment={resolvedPlayback.segment}
+      onAnimationComplete={onAnimationComplete}
+      onStepComplete={onStepComplete}
+      onPress={onPress}
+    />
+  );
 }

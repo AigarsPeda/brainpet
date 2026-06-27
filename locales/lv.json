@@ -32,18 +32,24 @@
     "puzzleStreak_other": "{{count}} mīklas pēc kārtas pareizi!",
     "giveMoment": "Dod {{name}} brīdi!",
     "notHungry": "{{name}} tagad nav izsalcis.",
+    "alreadyPampered": "{{name}} jau ir spoži tīrs un laimīgs!",
     "needCoinsFeed": "Vajag {{cost}} monētas, lai barotu {{name}}!",
     "enjoyedSnack": "{{name}} baudīja uzkodu!",
+    "bath": "Vanna",
+    "bathCost": "{{cost}} 🪙",
+    "enjoyedBath": "{{name}} mīl vannas laiku!",
+    "needCoinsBath": "Vajag {{cost}} monētas, lai ieliktu {{name}} vannā!",
     "a11yPet": "Apmīļot savu draugu",
     "a11yFeed": "Barot par {{cost}} monētām",
+    "a11yBath": "Vanna par {{cost}} monētām",
     "a11ySolve": "Atrisināt matemātikas uzdevumu",
     "a11ySettings": "Atvērt iestatījumus"
   },
   "onboarding": {
-    "title": "Dod savam kucēnam vārdu!",
-    "subtitle": "Izvēlies vārdu savam jaunajam draugam. To redzēsi sākuma ekrānā.",
+    "title": "Dod savam kaķim vārdu!",
+    "subtitle": "Izvēlies vārdu savam jaunajam draugam.",
     "petName": "Mājdzīvnieka vārds",
-    "placeholder": "piem., Reksis",
+    "placeholder": "piem., Ūsainis",
     "charCount": "{{count}}/{{max}} rakstzīmes",
     "meetPet": "Satikt savu draugu!",
     "a11yPetName": "Mājdzīvnieka vārds",
@@ -52,11 +58,14 @@
   "pet": {
     "level": "{{level}}. līmenis",
     "fed": "Paēdis",
+    "cleanliness": "Tīrība",
     "happiness": "Laime",
+    "wisdom": "Gudrība",
     "speech": {
       "idle": "Man iet lieliski!",
       "happy": "Esmu tik laimīgs!",
       "hungry": "Vēders rūc…",
+      "dirty": "Vajag vannu…",
       "sad": "Vajag kādu pieskārienu.",
       "sleepy": "Sāk gribēties gulēt…",
       "sleeping": "Zzz…",
@@ -79,7 +88,8 @@
     "fallingAsleep": "Sāk gulēt…",
     "sleeping": "Zzz…",
     "correct": "Lieliski!",
-    "coinCatch": "Monēta noķerta!"
+    "coinCatch": "Monēta noķerta!",
+    "bathing": "Šļakš!"
   },
   "scenario": {
     "fallAsleep": "Sāk gulēt…",

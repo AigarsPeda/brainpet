@@ -203,6 +203,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       pet: {
         ...createDefaultGameSave().pet,
         name: trimmed,
+        type: "cat",
         lastCareAt: Date.now(),
       },
       hasCompletedOnboarding: true,

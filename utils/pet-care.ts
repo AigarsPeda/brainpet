@@ -1,4 +1,6 @@
 import {
+  CLEANLINESS_DECAY_PER_HOUR,
+  CLEANLINESS_SPEECH_DIRTY_MAX,
   HAPPINESS_DECAY_LOW_HUNGER_PER_HOUR,
   HAPPINESS_DECAY_PER_HOUR,
   HUNGER_DECAY_PER_HOUR,
@@ -14,12 +16,24 @@ export function clampStat(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
+export function isStatMax(value: number): boolean {
+  return value >= 100;
+}
+
+export function boostStat(current: number, amount: number): number {
+  return isStatMax(current) ? current : clampStat(current + amount);
+}
+
 export function isHappinessMax(stats: PetStats): boolean {
-  return stats.happiness >= 100;
+  return isStatMax(stats.happiness);
 }
 
 export function isHungerMax(stats: PetStats): boolean {
-  return stats.hunger >= 100;
+  return isStatMax(stats.hunger);
+}
+
+export function isCleanlinessMax(stats: PetStats): boolean {
+  return isStatMax(stats.cleanliness);
 }
 
 /** True when the pet needs food (fullness is low). */
@@ -27,9 +41,19 @@ export function isPetHungry(stats: PetStats): boolean {
   return stats.hunger <= HUNGER_SPEECH_FULLNESS_MAX;
 }
 
+/** True when the pet could use a bath. */
+export function isPetDirty(stats: PetStats): boolean {
+  return stats.cleanliness <= CLEANLINESS_SPEECH_DIRTY_MAX;
+}
+
 /** Feed has an effect unless hunger is already full (asleep pets can always be woken). */
 export function canFeedForEffect(stats: PetStats, isAsleep: boolean): boolean {
   return isAsleep || !isHungerMax(stats);
+}
+
+/** Bath helps when cleanliness or happiness can still rise (asleep pets can always be woken). */
+export function canBathForEffect(stats: PetStats, isAsleep: boolean): boolean {
+  return isAsleep || !isCleanlinessMax(stats) || !isHappinessMax(stats);
 }
 
 export function applyPetTimeDecay(
@@ -43,6 +67,9 @@ export function applyPetTimeDecay(
 
   const hours = elapsedMs / MS_PER_HOUR;
   const hunger = clampStat(pet.stats.hunger - HUNGER_DECAY_PER_HOUR * hours);
+  const cleanliness = clampStat(
+    pet.stats.cleanliness - CLEANLINESS_DECAY_PER_HOUR * hours,
+  );
 
   let happinessLoss = HAPPINESS_DECAY_PER_HOUR * hours;
   if (hunger < LOW_HUNGER_THRESHOLD) {
@@ -55,6 +82,7 @@ export function applyPetTimeDecay(
     stats: {
       ...pet.stats,
       hunger,
+      cleanliness,
       happiness: clampStat(pet.stats.happiness - happinessLoss),
     },
   };

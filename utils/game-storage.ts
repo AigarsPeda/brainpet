@@ -50,8 +50,9 @@ function normalizePuzzleProgress(value: unknown): PuzzleProgress {
 
 function normalizePetProfile(pet: Record<string, unknown>): PetProfile {
   const stats = isRecord(pet.stats) ? pet.stats : {};
+  const type = pet.type === "cat" ? "cat" : "dog";
   return {
-    type: pet.type === "cat" ? "cat" : "dog",
+    type,
     name: typeof pet.name === "string" ? pet.name : DEFAULT_PET.name,
     stats: {
       hunger:
@@ -62,6 +63,10 @@ function normalizePetProfile(pet: Record<string, unknown>): PetProfile {
         typeof stats.happiness === "number"
           ? stats.happiness
           : DEFAULT_PET.stats.happiness,
+      cleanliness:
+        typeof stats.cleanliness === "number"
+          ? stats.cleanliness
+          : DEFAULT_PET.stats.cleanliness,
       level:
         typeof stats.level === "number" ? stats.level : DEFAULT_PET.stats.level,
     },

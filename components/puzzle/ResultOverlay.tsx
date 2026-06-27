@@ -45,7 +45,13 @@ export function ResultOverlay({
     <AppBottomSheet visible={visible} onClose={onContinue}>
       <View style={styles.card}>
         <View style={styles.petWrap}>
-          <PetDisplay petType={petType} mood={petMood} width={moderateScale(120)} loop />
+          <PetDisplay
+            petType={petType}
+            mood={petMood}
+            width={moderateScale(120)}
+            loop
+            transparentBackground
+          />
         </View>
 
         <Text

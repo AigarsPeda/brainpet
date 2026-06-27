@@ -22,6 +22,7 @@ type PetVideoRendererProps = {
   scenarioSteps?: PetMediaSegment[];
   size?: number;
   loop?: boolean;
+  transparentBackground?: boolean;
   onAnimationComplete?: () => void;
   onStepComplete?: (stepIndex: number) => void;
   onPress?: () => void;
@@ -50,6 +51,7 @@ export function PetVideoRenderer({
   scenarioSteps,
   size = moderateScale(DEFAULT_SIZE),
   loop = false,
+  transparentBackground = false,
   onAnimationComplete,
   onStepComplete,
   onPress,
@@ -442,7 +444,13 @@ export function PetVideoRenderer({
   }, [layers.top, layers.under]);
 
   const content = (
-    <View style={[styles.container, { width: size, height: size }]}>
+    <View
+      style={[
+        styles.container,
+        transparentBackground && styles.containerTransparent,
+        { width: size, height: size },
+      ]}
+    >
       {mountedVideoKeys.map((key) => {
         const isTop = key === layers.top;
         const isUnder = key === layers.under;
@@ -455,6 +463,7 @@ export function PetVideoRenderer({
             player={players[key]}
             style={[
               styles.videoLayer,
+              transparentBackground && styles.videoLayerTransparent,
               {
                 zIndex: isTop ? 2 : isUnder ? 1 : 0,
                 opacity,
@@ -503,8 +512,15 @@ const styles = StyleSheet.create({
     backgroundColor: GameColors.petVideoBg,
     borderRadius: moderateScale(12),
   },
+  containerTransparent: {
+    backgroundColor: "transparent",
+    borderRadius: 0,
+  },
   videoLayer: {
     ...StyleSheet.absoluteFill,
     backgroundColor: GameColors.petVideoBg,
+  },
+  videoLayerTransparent: {
+    backgroundColor: "transparent",
   },
 });

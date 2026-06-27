@@ -9,7 +9,7 @@ export type PetMood =
   | "sleeping";
 
 /** Short puzzle / reward clips — not derived from pet stats. */
-export type PetReaction = "correct" | "coinCatch";
+export type PetReaction = "correct" | "coinCatch" | "bathing";
 
 export type PetAnimationState = PetMood | PetReaction;
 
@@ -19,6 +19,7 @@ export type PetStats = {
   level: number;
   hunger: number;
   happiness: number;
+  cleanliness: number;
 };
 
 export type PetProfile = {

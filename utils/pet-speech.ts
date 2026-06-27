@@ -1,16 +1,16 @@
-import {
-  PUZZLE_STREAK_NOTIFY_MIN,
-} from "@/constants/game";
+import { PUZZLE_STREAK_NOTIFY_MIN } from "@/constants/game";
 import { hasIncompletePuzzles } from "@/constants/puzzles";
 import type { PetAnimationState, PetProfile, PuzzleProgress } from "@/types/game";
 import type { AppLocale } from "@/types/locale";
-import { isPetHungry } from "@/utils/pet-care";
+import { isPetDirty, isPetHungry } from "@/utils/pet-care";
 
 const PET_TAP_KEYS = [
   "pet.speech.petTap1",
   "pet.speech.petTap2",
   "pet.speech.petTap3",
 ] as const;
+
+const QUIET_SPEECH_KEYS = new Set(["pet.speech.idle", "pet.speech.happy"]);
 
 export type PetTapSpeechKey = (typeof PET_TAP_KEYS)[number];
 
@@ -32,7 +32,6 @@ export function pickPetTapSpeechKey(): PetTapSpeechKey {
   return PET_TAP_KEYS[index] ?? PET_TAP_KEYS[0];
 }
 
-/** Contextual line when the pet is not showing a short action message. */
 export function getIdleSpeech({
   pet,
   mood,
@@ -49,6 +48,9 @@ export function getIdleSpeech({
   if (pet.stats.happiness < 30) {
     return { key: "pet.speech.sad" };
   }
+  if (isPetDirty(pet.stats)) {
+    return { key: "pet.speech.dirty" };
+  }
   if (isPetHungry(pet.stats)) {
     return { key: "pet.speech.hungry" };
   }
@@ -62,4 +64,20 @@ export function getIdleSpeech({
     return { key: "pet.speech.happy" };
   }
   return { key: "pet.speech.idle" };
+}
+
+export function shouldShowContextualSpeech(context: IdleSpeechContext): boolean {
+  return !QUIET_SPEECH_KEYS.has(getIdleSpeech(context).key);
+}
+
+export function getContextualSpeechMessage(
+  context: IdleSpeechContext,
+  translate: (key: string, params?: Record<string, unknown>) => string,
+): string | null {
+  const { key, params } = getIdleSpeech(context);
+  if (QUIET_SPEECH_KEYS.has(key)) {
+    return null;
+  }
+
+  return translate(key, { name: context.pet.name, ...params });
 }

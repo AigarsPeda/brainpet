@@ -113,3 +113,39 @@ export function resolvePuzzlePathDifficulty(
   }
   return getNextIncompleteDifficulty(locale, puzzlesSolved, requested) ?? requested;
 }
+
+const LOCALES = Object.keys(PUZZLES_BY_LOCALE) as AppLocale[];
+
+/** Max puzzle count per tier — grows when new puzzles ship in any locale. */
+export function getTotalPuzzleCountByDifficulty(): Record<
+  PuzzleDifficulty,
+  number
+> {
+  return PUZZLE_DIFFICULTIES.reduce(
+    (totals, difficulty) => {
+      totals[difficulty] = Math.max(
+        ...LOCALES.map((locale) => getPuzzlesByDifficulty(locale, difficulty).length),
+      );
+      return totals;
+    },
+    { easy: 0, medium: 0, hard: 0 } as Record<PuzzleDifficulty, number>,
+  );
+}
+
+/**
+ * Puzzle mastery (0–100). Only rises when new nuts are cracked; drops when
+ * new puzzles are added and the player has not solved them yet.
+ */
+export function computePetWisdom(puzzlesSolved: PuzzleProgress): number {
+  const totals = getTotalPuzzleCountByDifficulty();
+  let solved = 0;
+  let available = 0;
+
+  for (const difficulty of PUZZLE_DIFFICULTIES) {
+    available += totals[difficulty];
+    solved += Math.min(puzzlesSolved[difficulty], totals[difficulty]);
+  }
+
+  if (available === 0) return 0;
+  return Math.round((solved / available) * 100);
+}

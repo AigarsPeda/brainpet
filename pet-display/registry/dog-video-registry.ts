@@ -1,4 +1,6 @@
+import { USE_CAT_SPRITE_PETS } from "@/constants/pet-display";
 import { MOOD_ANIMATION, ONE_SHOT_ANIMATIONS } from "@/constants/game";
+import { catSpriteRegistry } from "@/pet-display/registry/cat-sprite-registry";
 import type { PetAnimationState, PetType } from "@/types/game";
 import type {
   PetMediaRegistry,
@@ -52,6 +54,7 @@ const MOOD_ASSET_KEYS: Record<PetAnimationState, DogVideoAssetKey> = {
   sleeping: "sleeping",
   correct: "correct",
   coinCatch: "catches_a_coin",
+  bathing: "idle",
 };
 
 const REACTION_CONFIG: Record<
@@ -69,6 +72,13 @@ function segmentFromMood(mood: PetAnimationState): PetMediaSegment {
       assetKey: reaction.assetKey,
       loop: false,
       startMs: reaction.startMs,
+    };
+  }
+
+  if (mood === "bathing") {
+    return {
+      assetKey: MOOD_ASSET_KEYS.bathing,
+      loop: false,
     };
   }
 
@@ -139,7 +149,7 @@ export const DOG_VIDEO_PRIME_SEC: Record<DogVideoAssetKey, number> = {
 
 const REGISTRIES: Record<PetType, PetMediaRegistry> = {
   dog: dogVideoRegistry,
-  cat: dogVideoRegistry,
+  cat: USE_CAT_SPRITE_PETS ? catSpriteRegistry : dogVideoRegistry,
 };
 
 export function getPetMediaRegistry(petType: PetType): PetMediaRegistry {

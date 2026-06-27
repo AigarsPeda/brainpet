@@ -50,5 +50,7 @@ const styles = StyleSheet.create({
     borderColor: GameColors.cardBorder,
     transform: [{ rotate: "45deg" }],
     marginTop: moderateScale(-6),
+    alignSelf: "flex-start",
+    marginLeft: moderateScale(18),
   },
 });

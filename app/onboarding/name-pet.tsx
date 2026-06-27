@@ -68,7 +68,7 @@ export default function NamePetScreen() {
       >
         <View style={styles.screen}>
           <View style={styles.header}>
-            <Text style={styles.emoji}>🐶</Text>
+            <Text style={styles.emoji}>🐱</Text>
             <Text style={styles.title}>{t("onboarding.title")}</Text>
             <Text style={styles.subtitle}>{t("onboarding.subtitle")}</Text>
           </View>

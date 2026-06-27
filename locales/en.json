@@ -31,18 +31,24 @@
     "puzzleStreak_other": "{{count}} puzzles correct in a row!",
     "giveMoment": "Give {{name}} a moment!",
     "notHungry": "{{name}} isn't hungry right now.",
+    "alreadyPampered": "{{name}} is already sparkling clean and happy!",
     "needCoinsFeed": "Need {{cost}} coins to feed {{name}}!",
     "enjoyedSnack": "{{name}} enjoyed the snack!",
+    "bath": "Bath",
+    "bathCost": "{{cost}} 🪙",
+    "enjoyedBath": "{{name}} loves bath time!",
+    "needCoinsBath": "Need {{cost}} coins to bathe {{name}}!",
     "a11yPet": "Pet your companion",
     "a11yFeed": "Feed for {{cost}} coins",
+    "a11yBath": "Bathe for {{cost}} coins",
     "a11ySolve": "Solve a math puzzle",
     "a11ySettings": "Open settings"
   },
   "onboarding": {
-    "title": "Name your puppy!",
-    "subtitle": "Pick a name for your new friend. You can see it on the home screen.",
+    "title": "Name your cat!",
+    "subtitle": "Pick a name for your new friend.",
     "petName": "Pet name",
-    "placeholder": "e.g. Buddy",
+    "placeholder": "e.g. Whiskers",
     "charCount": "{{count}}/{{max}} characters",
     "meetPet": "Meet my pet!",
     "a11yPetName": "Pet name",
@@ -51,11 +57,14 @@
   "pet": {
     "level": "Level {{level}}",
     "fed": "Fed",
+    "cleanliness": "Clean",
     "happiness": "Happiness",
+    "wisdom": "Wisdom",
     "speech": {
       "idle": "I'm doing great!",
       "happy": "So happy right now!",
       "hungry": "My tummy is rumbling…",
+      "dirty": "I could use a bath…",
       "sad": "Could use a hug.",
       "sleepy": "I'm getting sleepy…",
       "sleeping": "Zzz…",
@@ -77,7 +86,8 @@
     "fallingAsleep": "Getting sleepy…",
     "sleeping": "Zzz…",
     "correct": "Nice one!",
-    "coinCatch": "Coin caught!"
+    "coinCatch": "Coin caught!",
+    "bathing": "Splish splash!"
   },
   "scenario": {
     "fallAsleep": "Getting sleepy…",

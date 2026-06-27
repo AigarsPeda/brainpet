@@ -6,6 +6,25 @@ import type {
 } from "@/types/game";
 
 /** One playable slice of pet media (video segment, sprite frame range, etc.). */
+export type SpriteFrameCoord = { col: number; row: number };
+
+export type SpriteSheetConfig = {
+  source: number;
+  frameWidth: number;
+  frameHeight: number;
+  sheetWidth: number;
+  sheetHeight: number;
+  frames: SpriteFrameCoord[];
+  fps: number;
+  anchor?: "bottom-center" | "center";
+  reverse?: boolean;
+  /** Match on-screen size to 32px sprites when source cells are larger (e.g. bath). */
+  scaleReferenceHeight?: number;
+  /** Extra integer scale steps for large-frame animations (bath tub scene). */
+  pixelScaleBoost?: number;
+  maxPixelScale?: number;
+};
+
 export type PetMediaSegment = {
   assetKey: string;
   loop?: boolean;
@@ -13,6 +32,7 @@ export type PetMediaSegment = {
   endMs?: number;
   /** Play the segment backwards (endMs → startMs). Video only. */
   reverse?: boolean;
+  sprite?: SpriteSheetConfig;
 };
 
 export type PetScenarioId = "fallAsleep" | "wakeUp";

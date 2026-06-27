@@ -2,6 +2,9 @@ import { GameHeaderStats } from "@/components/economy/GameHeaderStats";
 import { PetStage } from "@/components/pet/PetStage";
 import { PuzzleStreakBanner } from "@/components/pet/PuzzleStreakBanner";
 import {
+  BATH_HAPPINESS_BOOST,
+  BATH_CLEANLINESS_RESTORE,
+  BATH_COST,
   FEED_COST,
   FEED_HAPPINESS_BOOST,
   FEED_HUNGER_RESTORE,
@@ -9,20 +12,21 @@ import {
   PET_HAPPINESS_BOOST,
   PUZZLE_STREAK_NOTIFY_MIN,
 } from "@/constants/game";
+import { USE_CAT_SPRITE_PETS } from "@/constants/pet-display";
+import { computePetWisdom } from "@/constants/puzzles";
 import { usePetDisplay } from "@/pet-display/hooks/use-pet-display";
 import { shouldPetSleep } from "@/pet-display/engine/derive-mood";
 import { useGame } from "@/contexts/GameProvider";
 import { useLocale } from "@/contexts/LocaleProvider";
 import type { PetStats } from "@/types/game";
 import {
+  boostStat,
   canFeedForEffect,
-  clampStat,
-  isHappinessMax,
-  isHungerMax,
+  canBathForEffect,
   withPetCareUpdate,
 } from "@/utils/pet-care";
 import {
-  getIdleSpeech,
+  getContextualSpeechMessage,
   pickPetTapSpeechKey,
 } from "@/utils/pet-speech";
 import { moderateScale } from "@/utils/scale";
@@ -90,22 +94,26 @@ export default function HomeScreen() {
     };
   }, []);
 
-  const idleSpeech = useMemo(() => {
-    const { key, params } = getIdleSpeech({
-      pet,
-      mood: baseVideoMood,
-      locale,
-      puzzlesSolved: progress.puzzlesSolved,
-      puzzleStreak: progress.puzzleStreak,
-    });
-    return t(key, { name: pet.name, ...params });
-  }, [baseVideoMood, locale, pet, progress.puzzleStreak, progress.puzzlesSolved, t]);
+  const contextualSpeech = useMemo(
+    () =>
+      getContextualSpeechMessage(
+        {
+          pet,
+          mood: baseVideoMood,
+          locale,
+          puzzlesSolved: progress.puzzlesSolved,
+          puzzleStreak: progress.puzzleStreak,
+        },
+        t,
+      ),
+    [baseVideoMood, locale, pet, progress.puzzleStreak, progress.puzzlesSolved, t],
+  );
 
   const showPuzzleStreak =
     progress.puzzleStreak >= PUZZLE_STREAK_NOTIFY_MIN &&
     actionSpeech === null;
 
-  const speechMessage = actionSpeech ?? idleSpeech;
+  const speechMessage = actionSpeech ?? contextualSpeech;
 
   const rejectCareAction = useCallback(
     (text: string) => {
@@ -116,7 +124,7 @@ export default function HomeScreen() {
   );
 
   const playActionMood = useCallback(
-    (wasAsleep: boolean, mood: "excited" | "eating") => {
+    (wasAsleep: boolean, mood: "excited" | "eating" | "bathing") => {
       triggerHaptic();
       sendPetCommand({ type: "playAction", wasAsleep, mood });
     },
@@ -145,9 +153,7 @@ export default function HomeScreen() {
     showSpeech(t(pickPetTapSpeechKey(), { name: pet.name }));
     wakePet((stats) => ({
       ...stats,
-      happiness: isHappinessMax(stats)
-        ? stats.happiness
-        : clampStat(stats.happiness + PET_HAPPINESS_BOOST),
+      happiness: boostStat(stats.happiness, PET_HAPPINESS_BOOST),
     }));
   }, [
     isCareAnimationPlaying,
@@ -185,15 +191,59 @@ export default function HomeScreen() {
     setWallet((current) => ({ coins: current.coins - FEED_COST }));
     wakePet((stats) => ({
       ...stats,
-      hunger: isHungerMax(stats)
-        ? stats.hunger
-        : clampStat(stats.hunger + FEED_HUNGER_RESTORE),
-      happiness: isHappinessMax(stats)
-        ? stats.happiness
-        : clampStat(stats.happiness + FEED_HAPPINESS_BOOST),
+      hunger: boostStat(stats.hunger, FEED_HUNGER_RESTORE),
+      happiness: boostStat(stats.happiness, FEED_HAPPINESS_BOOST),
     }));
     playActionMood(wasAsleep, "eating");
     showSpeech(t("home.enjoyedSnack", { name: pet.name }));
+  }, [
+    isCareAnimationPlaying,
+    isCareBlocked,
+    pet.isAsleep,
+    pet.name,
+    pet.stats,
+    playActionMood,
+    recordInteraction,
+    rejectCareAction,
+    sendPetCommand,
+    setWallet,
+    showSpeech,
+    t,
+    wakePet,
+    wallet.coins,
+  ]);
+
+  const handleBath = useCallback(() => {
+    const wasAsleep = pet.isAsleep === true;
+
+    if (isCareAnimationPlaying || isCareBlocked) {
+      rejectCareAction(t("home.giveMoment", { name: pet.name }));
+      return;
+    }
+
+    if (!canBathForEffect(pet.stats, wasAsleep)) {
+      rejectCareAction(t("home.alreadyPampered", { name: pet.name }));
+      return;
+    }
+
+    if (wallet.coins < BATH_COST) {
+      rejectCareAction(
+        t("home.needCoinsBath", { cost: BATH_COST, name: pet.name }),
+      );
+      return;
+    }
+
+    recordInteraction();
+    sendPetCommand({ type: "beginCareAction" });
+    triggerHaptic();
+    setWallet((current) => ({ coins: current.coins - BATH_COST }));
+    wakePet((stats) => ({
+      ...stats,
+      cleanliness: boostStat(stats.cleanliness, BATH_CLEANLINESS_RESTORE),
+      happiness: boostStat(stats.happiness, BATH_HAPPINESS_BOOST),
+    }));
+    playActionMood(wasAsleep, "bathing");
+    showSpeech(t("home.enjoyedBath", { name: pet.name }));
   }, [
     isCareAnimationPlaying,
     isCareBlocked,
@@ -248,12 +298,20 @@ export default function HomeScreen() {
 
   const wasAsleep = pet.isAsleep === true;
   const canFeedForHunger = canFeedForEffect(pet.stats, wasAsleep);
+  const canBathForHappiness = canBathForEffect(pet.stats, wasAsleep);
   const canAffordFeed = wallet.coins >= FEED_COST;
+  const canAffordBath = wallet.coins >= BATH_COST;
   const feedDimmed =
     !canFeedForHunger ||
     !canAffordFeed ||
     isCareBlocked ||
     isCareAnimationPlaying;
+  const bathDimmed =
+    !canBathForHappiness ||
+    !canAffordBath ||
+    isCareBlocked ||
+    isCareAnimationPlaying;
+  const showBathAction = USE_CAT_SPRITE_PETS && pet.type === "cat";
   const petAnimating = isCareAnimationPlaying;
 
   return (
@@ -283,6 +341,7 @@ export default function HomeScreen() {
             name={pet.name}
             petType={pet.type}
             stats={pet.stats}
+            wisdom={computePetWisdom(progress.puzzlesSolved)}
             speechMessage={speechMessage}
             playback={playback}
             onPetPress={petAnimating ? undefined : handlePetTap}
@@ -330,6 +389,27 @@ export default function HomeScreen() {
                 {t("home.feedCost", { cost: FEED_COST })}
               </Text>
             </Pressable>
+
+            {showBathAction ? (
+              <Pressable
+                style={[
+                  styles.actionBtn,
+                  styles.actionSecondary,
+                  bathDimmed && styles.actionDisabled,
+                ]}
+                onPress={handleBath}
+                disabled={isCareAnimationPlaying}
+                accessibilityRole="button"
+                accessibilityLabel={t("home.a11yBath", { cost: BATH_COST })}
+                accessibilityState={{ disabled: isCareAnimationPlaying }}
+              >
+                <Text style={styles.actionEmoji}>🛁</Text>
+                <Text style={styles.actionLabel}>{t("home.bath")}</Text>
+                <Text style={styles.actionHint}>
+                  {t("home.bathCost", { cost: BATH_COST })}
+                </Text>
+              </Pressable>
+            ) : null}
           </View>
 
           <Pressable
