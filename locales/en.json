@@ -42,7 +42,25 @@
     "a11yFeed": "Feed for {{cost}} coins",
     "a11yBath": "Bathe for {{cost}} coins",
     "a11ySolve": "Solve a math puzzle",
+    "a11yStore": "Open room store",
     "a11ySettings": "Open settings"
+  },
+  "store": {
+    "title": "Room Store",
+    "subtitle": "Buy new backgrounds for your cat's home.",
+    "roomName": "Room {{number}}",
+    "free": "Free",
+    "buyFor": "{{cost}} 🪙",
+    "equip": "Equip",
+    "equipped": "Equipped",
+    "purchased": "Room {{number}} is yours!",
+    "alreadyOwned": "You already own this room.",
+    "needCoins": "Need {{cost}} coins for this room.",
+    "unavailable": "This room isn't available yet.",
+    "comingSoon": "Soon",
+    "a11yBuy": "Buy room {{number}} for {{cost}} coins",
+    "a11yClaim": "Claim room {{number}}",
+    "a11yEquip": "Equip room {{number}}"
   },
   "onboarding": {
     "title": "Name your cat!",

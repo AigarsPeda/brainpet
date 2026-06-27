@@ -11,14 +11,16 @@ import {
 } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <LocaleProvider>
-      <GameProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <LocaleProvider>
+        <GameProvider>
         <PetDisplayProvider>
           <ExpoUIHost>
             <ThemeProvider
@@ -36,6 +38,7 @@ export default function RootLayout() {
                 <Stack.Screen name="puzzles" options={{ headerShown: false }} />
                 <Stack.Screen name="play" options={{ headerShown: false }} />
                 <Stack.Screen name="settings" options={{ headerShown: false }} />
+                <Stack.Screen name="store" options={{ headerShown: false }} />
                 <Stack.Screen
                   name="onboarding/name-pet"
                   options={{ headerShown: false }}
@@ -51,5 +54,6 @@ export default function RootLayout() {
         </PetDisplayProvider>
       </GameProvider>
     </LocaleProvider>
+    </GestureHandlerRootView>
   );
 }

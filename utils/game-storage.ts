@@ -1,3 +1,4 @@
+import { DEFAULT_CAT_ROOM_ID, resolveCatRoomId } from "@/constants/cat-rooms";
 import {
   DEFAULT_PET,
   DEFAULT_PROGRESS,
@@ -17,6 +18,7 @@ import {
 } from "@/types/save";
 import { applyLifeRegen, createDefaultLives } from "@/utils/lives";
 import { applyPetTimeDecay } from "@/utils/pet-care";
+import { normalizeRoomsUnlocked } from "@/utils/room-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export function createDefaultGameSave(): GameSave {
@@ -45,6 +47,23 @@ function normalizePuzzleProgress(value: unknown): PuzzleProgress {
     easy: typeof value.easy === "number" ? value.easy : 0,
     medium: typeof value.medium === "number" ? value.medium : 0,
     hard: typeof value.hard === "number" ? value.hard : 0,
+  };
+}
+
+function clampOffsetAxis(value: number) {
+  return Math.max(-1, Math.min(1, value));
+}
+
+function normalizeRoomPetOffset(
+  value: unknown,
+): PetProfile["roomPetOffset"] | undefined {
+  if (!isRecord(value)) return undefined;
+  if (typeof value.x !== "number" || typeof value.y !== "number") {
+    return undefined;
+  }
+  return {
+    x: clampOffsetAxis(value.x),
+    y: clampOffsetAxis(value.y),
   };
 }
 
@@ -79,6 +98,11 @@ function normalizePetProfile(pet: Record<string, unknown>): PetProfile {
           ? pet.lastCareAt
           : Date.now(),
     isAsleep: pet.isAsleep === true,
+    roomId:
+      typeof pet.roomId === "string"
+        ? resolveCatRoomId(pet.roomId)
+        : DEFAULT_CAT_ROOM_ID,
+    roomPetOffset: normalizeRoomPetOffset(pet.roomPetOffset),
   };
 }
 
@@ -134,8 +158,22 @@ function parseGameSave(
         ? parsed.pet.lastCareAt
         : Date.now();
     const awayMs = Math.max(0, Date.now() - rawLastCareAt);
+    const normalizedPet = normalizePetProfile(parsed.pet);
+    const roomsUnlocked = normalizeRoomsUnlocked(
+      parsed.progress.roomsUnlocked,
+      resolveCatRoomId(normalizedPet.roomId),
+    );
+    const equippedRoomId = resolveCatRoomId(normalizedPet.roomId);
     const pet = resolveAsleepOnLoad(
-      applyPetTimeDecay(normalizePetProfile(parsed.pet), Date.now()),
+      applyPetTimeDecay(
+        {
+          ...normalizedPet,
+          roomId: roomsUnlocked.includes(equippedRoomId)
+            ? equippedRoomId
+            : DEFAULT_CAT_ROOM_ID,
+        },
+        Date.now(),
+      ),
       awayMs,
     );
 
@@ -152,6 +190,7 @@ function parseGameSave(
           puzzlesSolved,
           lives,
           visualHelpsUnlocked,
+          roomsUnlocked,
         },
       },
       awayMsAtSessionStart: awayMs,

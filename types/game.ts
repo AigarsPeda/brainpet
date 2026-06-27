@@ -32,6 +32,10 @@ export type PetProfile = {
   lastInteractionAt?: number;
   /** Persisted asleep loop — cleared when the player feeds or pets. */
   isAsleep?: boolean;
+  /** Owned room background for cat pets (`room1` default). */
+  roomId?: string;
+  /** Normalized offset from room center (-1..1). */
+  roomPetOffset?: { x: number; y: number };
 };
 
 export type Wallet = {
@@ -58,4 +62,6 @@ export type Progress = {
   lives: LivesState;
   /** Puzzle ids with a permanently unlocked visual help. */
   visualHelpsUnlocked: string[];
+  /** Cat room backgrounds the player owns (`room1` is always included). */
+  roomsUnlocked: string[];
 };

@@ -1,3 +1,5 @@
+import { DraggableRoomPet } from "@/components/pet/DraggableRoomPet";
+import { PetRoomBackground } from "@/components/pet/PetRoomBackground";
 import { PetSpeechBubble } from "@/components/pet/PetSpeechBubble";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { resolveSpriteDisplaySize } from "@/constants/cat-sprites";
@@ -14,7 +16,7 @@ import { type LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 
 const COMPACT_PET_MIN = 200;
 const COMPACT_PET_MAX = 300;
-const COMPACT_SPRITE_PET_SIZE = 160;
+const COMPACT_SPRITE_PET_SIZE = 96;
 
 function compactPetWidth(petType: PetType, compact: boolean) {
   const usesSprite = USE_CAT_SPRITE_PETS && petType === "cat";
@@ -38,10 +40,13 @@ type PetStageProps = {
   petType: PetType;
   stats: PetStats;
   wisdom: number;
+  roomId?: string;
+  roomPetOffset?: { x: number; y: number };
   speechMessage?: string | null;
   playback: PetPlaybackState;
   compact?: boolean;
   onPetPress?: () => void;
+  onRoomPetOffsetChange?: (offset: { x: number; y: number }) => void;
   onAnimationComplete?: () => void;
   onStepComplete?: (stepIndex: number) => void;
 };
@@ -82,10 +87,13 @@ export function PetStage({
   petType,
   stats,
   wisdom,
+  roomId,
+  roomPetOffset,
   speechMessage,
   playback,
   compact = false,
   onPetPress,
+  onRoomPetOffsetChange,
   onAnimationComplete,
   onStepComplete,
 }: PetStageProps) {
@@ -134,12 +142,27 @@ export function PetStage({
         petType={petType}
         playback={playback}
         width={displayWidth}
-        onPress={onPetPress}
+        transparentBackground={usesSprite}
+        onPress={compact && usesSprite ? undefined : onPetPress}
         onAnimationComplete={onAnimationComplete}
         onStepComplete={onStepComplete}
       />
     </View>
   );
+
+  const roomPetLayer =
+    compact && usesSprite ? (
+      <DraggableRoomPet
+        petSize={displayWidth}
+        initialOffset={roomPetOffset}
+        onOffsetChange={onRoomPetOffsetChange}
+        onPetTap={onPetPress}
+      >
+        {petCluster}
+      </DraggableRoomPet>
+    ) : (
+      <View style={styles.petStack}>{petCluster}</View>
+    );
 
   return (
     <View style={[styles.stage, compact && styles.stageCompact]}>
@@ -157,7 +180,8 @@ export function PetStage({
           <View
             style={[styles.avatarWrap, compact && styles.avatarWrapCompact]}
           >
-            {compact ? <View style={styles.petStack}>{petCluster}</View> : petCluster}
+            {usesSprite ? <PetRoomBackground roomId={roomId} /> : null}
+            {compact ? roomPetLayer : petCluster}
           </View>
 
           <View style={[styles.stats, compact && styles.statsCompact]}>
@@ -205,9 +229,9 @@ const styles = StyleSheet.create({
   stageCompact: {
     flex: 1,
     borderRadius: moderateScale(16),
-    paddingTop: moderateScale(16),
-    paddingBottom: moderateScale(16),
-    paddingHorizontal: moderateScale(14),
+    paddingTop: moderateScale(12),
+    paddingBottom: moderateScale(10),
+    paddingHorizontal: moderateScale(12),
   },
   nameHeader: {
     alignItems: "center",
@@ -235,8 +259,7 @@ const styles = StyleSheet.create({
   },
   petColumnCompact: {
     flex: 1,
-    justifyContent: "space-between",
-    paddingBottom: moderateScale(4),
+    paddingBottom: moderateScale(2),
   },
   avatarWrap: {
     minHeight: moderateScale(120),
@@ -244,19 +267,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "100%",
     position: "relative",
+    overflow: "hidden",
   },
   avatarWrapCompact: {
     flex: 1,
-    minHeight: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingBottom: moderateScale(12),
+    minHeight: moderateScale(260),
+    borderRadius: moderateScale(12),
   },
   petStack: {
     width: "100%",
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 1,
   },
   petCenterSlot: {
     alignItems: "center",
@@ -285,8 +308,9 @@ const styles = StyleSheet.create({
     gap: moderateScale(12),
   },
   statsCompact: {
-    gap: moderateScale(6),
-    paddingTop: moderateScale(8),
+    flexShrink: 0,
+    gap: moderateScale(5),
+    paddingTop: moderateScale(6),
   },
   statRow: {
     flexDirection: "row",

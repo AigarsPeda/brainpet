@@ -43,7 +43,25 @@
     "a11yFeed": "Barot par {{cost}} monētām",
     "a11yBath": "Vanna par {{cost}} monētām",
     "a11ySolve": "Atrisināt matemātikas uzdevumu",
+    "a11yStore": "Atvērt istabu veikalu",
     "a11ySettings": "Atvērt iestatījumus"
+  },
+  "store": {
+    "title": "Istabu veikals",
+    "subtitle": "Pērc jaunus fonus sava kaķa mājai.",
+    "roomName": "Istaba {{number}}",
+    "free": "Bezmaksas",
+    "buyFor": "{{cost}} 🪙",
+    "equip": "Izvēlēties",
+    "equipped": "Aktīva",
+    "purchased": "Istaba {{number}} ir tava!",
+    "alreadyOwned": "Šī istaba jau pieder tev.",
+    "needCoins": "Vajag {{cost}} monētas šai istabai.",
+    "unavailable": "Šī istaba vēl nav pieejama.",
+    "comingSoon": "Drīz",
+    "a11yBuy": "Pirkt istabu {{number}} par {{cost}} monētām",
+    "a11yClaim": "Saņemt istabu {{number}}",
+    "a11yEquip": "Izvēlēties istabu {{number}}"
   },
   "onboarding": {
     "title": "Dod savam kaķim vārdu!",

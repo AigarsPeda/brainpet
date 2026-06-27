@@ -1,7 +1,14 @@
 import { LIFE_BUY_COST } from "@/constants/game";
+import type { CatRoomId } from "@/constants/cat-rooms";
+import { resolveCatRoomId } from "@/constants/cat-rooms";
 import { resolveAsleepOnLoad } from "@/pet-display/engine/derive-mood";
 import type { PetProfile, Progress, Wallet } from "@/types/game";
+import type { RoomPurchaseResult } from "@/types/store";
 import type { GameSave } from "@/types/save";
+import {
+  isRoomUnlocked,
+  tryPurchaseRoom,
+} from "@/utils/room-store";
 import { PET_NAME_MAX_LENGTH } from "@/types/save";
 import {
   createDefaultGameSave,
@@ -35,6 +42,8 @@ type GameContextValue = {
   setProgress: (updater: (current: Progress) => Progress) => void;
   buyLife: () => boolean;
   purchaseVisualHelp: (puzzleId: string, cost: number) => boolean;
+  purchaseRoom: (roomId: CatRoomId) => RoomPurchaseResult;
+  equipRoom: (roomId: CatRoomId) => boolean;
   completeOnboarding: (name: string) => Promise<boolean>;
   recordInteraction: () => void;
 };
@@ -194,6 +203,57 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return purchased;
   }, []);
 
+  const purchaseRoom = useCallback((roomId: CatRoomId): RoomPurchaseResult => {
+    const resolvedId = resolveCatRoomId(roomId);
+    let result: RoomPurchaseResult = "invalid_room";
+
+    setSave((current) => {
+      const unlocked = current.progress.roomsUnlocked as CatRoomId[];
+      const attempt = tryPurchaseRoom({
+        roomId: resolvedId,
+        walletCoins: current.wallet.coins,
+        roomsUnlocked: unlocked,
+      });
+
+      result = attempt.result;
+      if (attempt.result !== "purchased") {
+        return current;
+      }
+
+      return {
+        ...current,
+        wallet: { coins: attempt.walletCoins },
+        progress: {
+          ...current.progress,
+          roomsUnlocked: attempt.roomsUnlocked,
+        },
+        pet: { ...current.pet, roomId: resolvedId },
+      };
+    });
+
+    return result;
+  }, []);
+
+  const equipRoom = useCallback((roomId: CatRoomId) => {
+    const resolvedId = resolveCatRoomId(roomId);
+    let equipped = false;
+
+    setSave((current) => {
+      const unlocked = current.progress.roomsUnlocked as CatRoomId[];
+      if (!isRoomUnlocked(resolvedId, unlocked)) {
+        return current;
+      }
+
+      equipped = true;
+      return {
+        ...current,
+        pet: { ...current.pet, roomId: resolvedId },
+      };
+    });
+
+    return equipped;
+  }, []);
+
   const completeOnboarding = useCallback(async (name: string) => {
     const trimmed = normalizePetName(name);
     if (!trimmed) return false;
@@ -226,6 +286,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setProgress,
       buyLife,
       purchaseVisualHelp,
+      purchaseRoom,
+      equipRoom,
       completeOnboarding,
       recordInteraction,
     }),
@@ -242,6 +304,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setProgress,
       buyLife,
       purchaseVisualHelp,
+      purchaseRoom,
+      equipRoom,
     ],
   );
 

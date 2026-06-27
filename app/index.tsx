@@ -267,6 +267,12 @@ export default function HomeScreen() {
     router.push("/settings");
   }, [recordInteraction, router]);
 
+  const handleOpenStore = useCallback(() => {
+    recordInteraction();
+    triggerHaptic();
+    router.push("/store");
+  }, [recordInteraction, router]);
+
   const handlePlayPuzzle = useCallback(() => {
     recordInteraction();
     triggerHaptic();
@@ -318,6 +324,16 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <View style={styles.screen}>
         <View style={styles.header}>
+          {showBathAction ? (
+            <Pressable
+              onPress={handleOpenStore}
+              style={styles.headerIconBtn}
+              accessibilityRole="button"
+              accessibilityLabel={t("home.a11yStore")}
+            >
+              <Text style={styles.headerIconEmoji}>🛍️</Text>
+            </Pressable>
+          ) : null}
           <View style={styles.headerStats}>
             <GameHeaderStats
               coins={wallet.coins}
@@ -327,11 +343,11 @@ export default function HomeScreen() {
           </View>
           <Pressable
             onPress={handleOpenSettings}
-            style={styles.settingsBtn}
+            style={styles.headerIconBtn}
             accessibilityRole="button"
             accessibilityLabel={t("home.a11ySettings")}
           >
-            <Text style={styles.settingsEmoji}>⚙️</Text>
+            <Text style={styles.headerIconEmoji}>⚙️</Text>
           </Pressable>
         </View>
 
@@ -343,9 +359,14 @@ export default function HomeScreen() {
               petType={pet.type}
               stats={pet.stats}
               wisdom={computePetWisdom(progress.puzzlesSolved)}
+              roomId={pet.roomId}
+              roomPetOffset={pet.roomPetOffset}
               speechMessage={speechMessage}
               playback={playback}
               onPetPress={petAnimating ? undefined : handlePetTap}
+              onRoomPetOffsetChange={(offset) =>
+                setPet((current) => ({ ...current, roomPetOffset: offset }))
+              }
               onAnimationComplete={handleAnimationComplete}
             />
           </View>
@@ -467,7 +488,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
   },
-  settingsBtn: {
+  headerIconBtn: {
     minWidth: moderateScale(40),
     minHeight: moderateScale(40),
     alignItems: "center",
@@ -477,7 +498,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: GameColors.cardBorder,
   },
-  settingsEmoji: {
+  headerIconEmoji: {
     fontSize: moderateScale(18),
   },
   stageWrap: {

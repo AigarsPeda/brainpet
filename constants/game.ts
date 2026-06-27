@@ -1,3 +1,4 @@
+import { DEFAULT_CAT_ROOM_ID } from "@/constants/cat-rooms";
 import type { PetAnimationState, PetMood } from "@/types/game";
 import type { PuzzleDifficulty } from "@/types/puzzle";
 
@@ -35,6 +36,7 @@ export const DEFAULT_PET = {
   lastCareAt: Date.now(),
   lastInteractionAt: Date.now(),
   isAsleep: false,
+  roomId: DEFAULT_CAT_ROOM_ID,
 };
 
 export const DEFAULT_WALLET = { coins: 42 };
@@ -44,6 +46,7 @@ export const DEFAULT_PROGRESS = {
   puzzlesSolved: { easy: 0, medium: 0, hard: 0 },
   lives: { current: 5, nextRegenAt: null },
   visualHelpsUnlocked: [] as string[],
+  roomsUnlocked: [DEFAULT_CAT_ROOM_ID] as string[],
 };
 
 export const MAX_LIVES = 5;
