@@ -47,6 +47,7 @@ export const DEFAULT_PROGRESS = {
   lives: { current: 5, nextRegenAt: null },
   visualHelpsUnlocked: [] as string[],
   roomsUnlocked: [DEFAULT_CAT_ROOM_ID] as string[],
+  bedsUnlocked: [] as string[],
 };
 
 export const MAX_LIVES = 5;

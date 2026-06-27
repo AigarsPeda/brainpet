@@ -1,10 +1,16 @@
 import { LIFE_BUY_COST } from "@/constants/game";
+import type { CatBedId } from "@/constants/cat-beds";
+import { resolveCatBedId } from "@/constants/cat-beds";
 import type { CatRoomId } from "@/constants/cat-rooms";
 import { resolveCatRoomId } from "@/constants/cat-rooms";
 import { resolveAsleepOnLoad } from "@/pet-display/engine/derive-mood";
 import type { PetProfile, Progress, Wallet } from "@/types/game";
-import type { RoomPurchaseResult } from "@/types/store";
+import type { BedPurchaseResult, RoomPurchaseResult } from "@/types/store";
 import type { GameSave } from "@/types/save";
+import {
+  isBedUnlocked,
+  tryPurchaseBed,
+} from "@/utils/bed-store";
 import {
   isRoomUnlocked,
   tryPurchaseRoom,
@@ -44,6 +50,8 @@ type GameContextValue = {
   purchaseVisualHelp: (puzzleId: string, cost: number) => boolean;
   purchaseRoom: (roomId: CatRoomId) => RoomPurchaseResult;
   equipRoom: (roomId: CatRoomId) => boolean;
+  purchaseBed: (bedId: CatBedId) => BedPurchaseResult;
+  equipBed: (bedId: CatBedId) => boolean;
   completeOnboarding: (name: string) => Promise<boolean>;
   recordInteraction: () => void;
 };
@@ -250,6 +258,64 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return true;
   }, []);
 
+  const purchaseBed = useCallback((bedId: CatBedId): BedPurchaseResult => {
+    const resolvedId = resolveCatBedId(bedId);
+    if (!resolvedId) {
+      return "invalid_item";
+    }
+
+    const current = saveRef.current;
+    const unlocked = current.progress.bedsUnlocked as CatBedId[];
+    const attempt = tryPurchaseBed({
+      bedId: resolvedId,
+      walletCoins: current.wallet.coins,
+      bedsUnlocked: unlocked,
+    });
+
+    if (attempt.result === "purchased") {
+      setSave({
+        ...current,
+        wallet: { coins: attempt.walletCoins },
+        progress: {
+          ...current.progress,
+          bedsUnlocked: attempt.bedsUnlocked,
+        },
+        pet: {
+          ...current.pet,
+          bedId: resolvedId,
+          roomBedOffset: current.pet.roomBedOffset ?? { x: -0.15, y: 0.3 },
+        },
+      });
+    }
+
+    return attempt.result;
+  }, []);
+
+  const equipBed = useCallback((bedId: CatBedId) => {
+    const resolvedId = resolveCatBedId(bedId);
+    if (!resolvedId) {
+      return false;
+    }
+
+    const current = saveRef.current;
+    const unlocked = current.progress.bedsUnlocked as CatBedId[];
+
+    if (!isBedUnlocked(resolvedId, unlocked)) {
+      return false;
+    }
+
+    setSave({
+      ...current,
+      pet: {
+        ...current.pet,
+        bedId: resolvedId,
+        roomBedOffset: current.pet.roomBedOffset ?? { x: -0.15, y: 0.3 },
+      },
+    });
+
+    return true;
+  }, []);
+
   const completeOnboarding = useCallback(async (name: string) => {
     const trimmed = normalizePetName(name);
     if (!trimmed) return false;
@@ -284,6 +350,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       purchaseVisualHelp,
       purchaseRoom,
       equipRoom,
+      purchaseBed,
+      equipBed,
       completeOnboarding,
       recordInteraction,
     }),
@@ -302,6 +370,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       purchaseVisualHelp,
       purchaseRoom,
       equipRoom,
+      purchaseBed,
+      equipBed,
     ],
   );
 

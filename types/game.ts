@@ -36,6 +36,10 @@ export type PetProfile = {
   roomId?: string;
   /** Normalized offset from room center (-1..1). */
   roomPetOffset?: { x: number; y: number };
+  /** Equipped bed in the cat room (`brown`, `green`, …). */
+  bedId?: string;
+  /** Normalized offset for the equipped bed (-1..1). */
+  roomBedOffset?: { x: number; y: number };
 };
 
 export type Wallet = {
@@ -64,4 +68,6 @@ export type Progress = {
   visualHelpsUnlocked: string[];
   /** Cat room backgrounds the player owns (`room1` is always included). */
   roomsUnlocked: string[];
+  /** Cat beds the player owns. */
+  bedsUnlocked: string[];
 };

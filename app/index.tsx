@@ -361,11 +361,16 @@ export default function HomeScreen() {
               wisdom={computePetWisdom(progress.puzzlesSolved)}
               roomId={pet.roomId}
               roomPetOffset={pet.roomPetOffset}
+              bedId={pet.bedId}
+              roomBedOffset={pet.roomBedOffset}
               speechMessage={speechMessage}
               playback={playback}
               onPetPress={petAnimating ? undefined : handlePetTap}
               onRoomPetOffsetChange={(offset) =>
                 setPet((current) => ({ ...current, roomPetOffset: offset }))
+              }
+              onRoomBedOffsetChange={(offset) =>
+                setPet((current) => ({ ...current, roomBedOffset: offset }))
               }
               onAnimationComplete={handleAnimationComplete}
             />

@@ -4,9 +4,12 @@ export type StorePrice =
   | { kind: "coins"; amount: number }
   | { kind: "iap"; productId: string };
 
-export type RoomPurchaseResult =
+export type StorePurchaseResult =
   | "purchased"
   | "already_owned"
   | "insufficient_funds"
-  | "not_for_sale"
-  | "invalid_room";
+  | "not_for_sale";
+
+export type RoomPurchaseResult = StorePurchaseResult | "invalid_room";
+
+export type BedPurchaseResult = StorePurchaseResult | "invalid_item";

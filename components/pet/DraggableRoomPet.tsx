@@ -16,6 +16,7 @@ type DraggableRoomPetProps = {
   initialOffset?: RoomPetOffset;
   onOffsetChange?: (offset: RoomPetOffset) => void;
   onPetTap?: () => void;
+  layerZIndex?: number;
 };
 
 function maxAxisOffset(roomSize: number, petSize: number) {
@@ -72,6 +73,7 @@ export function DraggableRoomPet({
   initialOffset = DEFAULT_OFFSET,
   onOffsetChange,
   onPetTap,
+  layerZIndex = 1,
 }: DraggableRoomPetProps) {
   const [roomSize, setRoomSize] = useState({ width: 0, height: 0 });
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -165,7 +167,8 @@ export function DraggableRoomPet({
 
   return (
     <View
-      style={styles.layer}
+      pointerEvents="box-none"
+      style={[styles.layer, { zIndex: layerZIndex }]}
       onLayout={(event) => {
         const { width, height } = event.nativeEvent.layout;
         setRoomSize({ width, height });
@@ -179,6 +182,7 @@ export function DraggableRoomPet({
             left,
             top,
             width: petSize,
+            height: petSize,
           },
         ]}
         collapsable={false}
@@ -193,7 +197,6 @@ export function DraggableRoomPet({
 const styles = StyleSheet.create({
   layer: {
     ...StyleSheet.absoluteFill,
-    zIndex: 1,
   },
   petSlot: {
     position: "absolute",

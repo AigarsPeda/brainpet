@@ -2,6 +2,7 @@ import { DraggableRoomPet } from "@/components/pet/DraggableRoomPet";
 import { PetRoomBackground } from "@/components/pet/PetRoomBackground";
 import { PetSpeechBubble } from "@/components/pet/PetSpeechBubble";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { getCatBedSource } from "@/constants/cat-beds";
 import { resolveSpriteDisplaySize } from "@/constants/cat-sprites";
 import { GameColors } from "@/constants/game";
 import { USE_CAT_SPRITE_PETS } from "@/constants/pet-display";
@@ -12,11 +13,12 @@ import { clampStat } from "@/utils/pet-care";
 import { moderateScale } from "@/utils/scale";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { type LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
+import { type LayoutChangeEvent, Image, StyleSheet, Text, View } from "react-native";
 
 const COMPACT_PET_MIN = 200;
 const COMPACT_PET_MAX = 300;
 const COMPACT_SPRITE_PET_SIZE = 96;
+const COMPACT_BED_SIZE = 72;
 
 function compactPetWidth(petType: PetType, compact: boolean) {
   const usesSprite = USE_CAT_SPRITE_PETS && petType === "cat";
@@ -42,11 +44,14 @@ type PetStageProps = {
   wisdom: number;
   roomId?: string;
   roomPetOffset?: { x: number; y: number };
+  bedId?: string;
+  roomBedOffset?: { x: number; y: number };
   speechMessage?: string | null;
   playback: PetPlaybackState;
   compact?: boolean;
   onPetPress?: () => void;
   onRoomPetOffsetChange?: (offset: { x: number; y: number }) => void;
+  onRoomBedOffsetChange?: (offset: { x: number; y: number }) => void;
   onAnimationComplete?: () => void;
   onStepComplete?: (stepIndex: number) => void;
 };
@@ -89,16 +94,21 @@ export function PetStage({
   wisdom,
   roomId,
   roomPetOffset,
+  bedId,
+  roomBedOffset,
   speechMessage,
   playback,
   compact = false,
   onPetPress,
   onRoomPetOffsetChange,
+  onRoomBedOffsetChange,
   onAnimationComplete,
   onStepComplete,
 }: PetStageProps) {
   const { t } = useTranslation();
   const usesSprite = USE_CAT_SPRITE_PETS && petType === "cat";
+  const bedSize = moderateScale(COMPACT_BED_SIZE);
+  const bedSource = usesSprite ? getCatBedSource(bedId) : undefined;
   const [avatarWidth, setAvatarWidth] = useState(
     compactPetWidth(petType, compact),
   );
@@ -157,12 +167,30 @@ export function PetStage({
         initialOffset={roomPetOffset}
         onOffsetChange={onRoomPetOffsetChange}
         onPetTap={onPetPress}
+        layerZIndex={2}
       >
         {petCluster}
       </DraggableRoomPet>
     ) : (
       <View style={styles.petStack}>{petCluster}</View>
     );
+
+  const roomBedLayer =
+    compact && usesSprite && bedSource ? (
+      <DraggableRoomPet
+        petSize={bedSize}
+        initialOffset={roomBedOffset ?? { x: -0.15, y: 0.3 }}
+        onOffsetChange={onRoomBedOffsetChange}
+        layerZIndex={1}
+      >
+        <Image
+          source={bedSource}
+          style={{ width: bedSize, height: bedSize }}
+          resizeMode="contain"
+          accessibilityIgnoresInvertColors
+        />
+      </DraggableRoomPet>
+    ) : null;
 
   return (
     <View style={[styles.stage, compact && styles.stageCompact]}>
@@ -181,6 +209,7 @@ export function PetStage({
             style={[styles.avatarWrap, compact && styles.avatarWrapCompact]}
           >
             {usesSprite ? <PetRoomBackground roomId={roomId} /> : null}
+            {roomBedLayer}
             {compact ? roomPetLayer : petCluster}
           </View>
 

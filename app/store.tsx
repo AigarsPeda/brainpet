@@ -1,11 +1,18 @@
 import { GameHeaderStats } from "@/components/economy/GameHeaderStats";
+import { BedStoreCard } from "@/components/store/BedStoreCard";
 import { RoomStoreCard } from "@/components/store/RoomStoreCard";
+import { StoreTabBar, type StoreTab } from "@/components/store/StoreTabBar";
 import { NotificationBanner } from "@/components/ui/NotificationBanner";
 import { SlideInNotificationSlot } from "@/components/ui/SlideInNotificationSlot";
+import { CAT_BED_IDS, type CatBedId } from "@/constants/cat-beds";
 import { CAT_ROOM_IDS, type CatRoomId } from "@/constants/cat-rooms";
 import { GameColors } from "@/constants/game";
 import { useGame } from "@/contexts/GameProvider";
-import type { RoomPurchaseResult } from "@/types/store";
+import type { BedPurchaseResult, RoomPurchaseResult } from "@/types/store";
+import {
+  getBedStorePrice,
+  isBedUnlocked,
+} from "@/utils/bed-store";
 import {
   getRoomStorePrice,
   isRoomUnlocked,
@@ -50,11 +57,16 @@ export default function StoreScreen() {
     progress,
     purchaseRoom,
     equipRoom,
+    purchaseBed,
+    equipBed,
     recordInteraction,
   } = useGame();
 
   const unlockedRooms = progress.roomsUnlocked as CatRoomId[];
+  const unlockedBeds = progress.bedsUnlocked as CatBedId[];
   const equippedRoomId = pet.roomId as CatRoomId | undefined;
+  const equippedBedId = pet.bedId as CatBedId | undefined;
+  const [activeTab, setActiveTab] = useState<StoreTab>("rooms");
   const [feedback, setFeedback] = useState<StoreFeedback | null>(null);
   const [feedbackVisible, setFeedbackVisible] = useState(false);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -84,6 +96,15 @@ export default function StoreScreen() {
       }, FEEDBACK_VISIBLE_MS);
     },
     [],
+  );
+
+  const handleTabChange = useCallback(
+    (tab: StoreTab) => {
+      recordInteraction();
+      triggerHaptic();
+      setActiveTab(tab);
+    },
+    [recordInteraction],
   );
 
   const handleBack = useCallback(() => {
@@ -157,6 +178,69 @@ export default function StoreScreen() {
     [equipRoom, recordInteraction, showFeedback, t],
   );
 
+  const showBedPurchaseMessage = useCallback(
+    (result: BedPurchaseResult, bedId: CatBedId) => {
+      const bedName = t(`store.bedName.${bedId}`);
+      switch (result) {
+        case "purchased":
+          return {
+            emoji: "🛏️",
+            message: t("store.purchasedBed", { name: bedName }),
+          };
+        case "already_owned":
+          return {
+            emoji: "✓",
+            message: t("store.alreadyOwnedBed"),
+          };
+        case "insufficient_funds": {
+          const price = getBedStorePrice(bedId);
+          const cost = price.kind === "coins" ? price.amount : 0;
+          return {
+            emoji: "🪙",
+            message: t("store.needCoinsBed", { cost }),
+          };
+        }
+        default:
+          return {
+            emoji: "⚠️",
+            message: t("store.unavailableBed"),
+          };
+      }
+    },
+    [t],
+  );
+
+  const handleBuyBed = useCallback(
+    (bedId: CatBedId) => {
+      recordInteraction();
+      triggerHaptic();
+      const result = purchaseBed(bedId);
+      if (result === "purchased") {
+        triggerHaptic();
+      }
+      if (result !== "already_owned") {
+        const { emoji, message } = showBedPurchaseMessage(result, bedId);
+        showFeedback(emoji, message);
+      }
+    },
+    [purchaseBed, recordInteraction, showBedPurchaseMessage, showFeedback],
+  );
+
+  const handleEquipBed = useCallback(
+    (bedId: CatBedId) => {
+      recordInteraction();
+      triggerHaptic();
+      const equipped = equipBed(bedId);
+      if (equipped) {
+        showFeedback(
+          "✨",
+          t("store.equippedBed", { name: t(`store.bedName.${bedId}`) }),
+        );
+      }
+    },
+    [equipBed, recordInteraction, showFeedback, t],
+  );
+
   if (!isReady) {
     return (
       <View style={styles.loading}>
@@ -190,8 +274,14 @@ export default function StoreScreen() {
 
         <View style={styles.titleBlock}>
           <Text style={styles.title}>{t("store.title")}</Text>
-          <Text style={styles.subtitle}>{t("store.subtitle")}</Text>
+          <Text style={styles.subtitle}>
+            {activeTab === "rooms"
+              ? t("store.subtitleRooms")
+              : t("store.subtitleBeds")}
+          </Text>
         </View>
+
+        <StoreTabBar active={activeTab} onChange={handleTabChange} />
 
         <View style={styles.content}>
           <SlideInNotificationSlot
@@ -207,28 +297,48 @@ export default function StoreScreen() {
           </SlideInNotificationSlot>
 
           <ScrollView
+            key={activeTab}
             style={styles.scroll}
             contentContainerStyle={styles.grid}
             showsVerticalScrollIndicator={false}
           >
-            {CAT_ROOM_IDS.map((roomId) => {
-              const price = getRoomStorePrice(roomId);
-              const owned = isRoomUnlocked(roomId, unlockedRooms);
-              const canAfford =
-                price.kind !== "coins" || wallet.coins >= price.amount;
+            {activeTab === "rooms"
+              ? CAT_ROOM_IDS.map((roomId) => {
+                  const price = getRoomStorePrice(roomId);
+                  const owned = isRoomUnlocked(roomId, unlockedRooms);
+                  const canAfford =
+                    price.kind !== "coins" || wallet.coins >= price.amount;
 
-              return (
-                <RoomStoreCard
-                  key={roomId}
-                  roomId={roomId}
-                  isOwned={owned}
-                  isEquipped={equippedRoomId === roomId}
-                  canAfford={canAfford}
-                  onBuy={() => handleBuy(roomId)}
-                  onEquip={() => handleEquip(roomId)}
-                />
-              );
-            })}
+                  return (
+                    <RoomStoreCard
+                      key={roomId}
+                      roomId={roomId}
+                      isOwned={owned}
+                      isEquipped={equippedRoomId === roomId}
+                      canAfford={canAfford}
+                      onBuy={() => handleBuy(roomId)}
+                      onEquip={() => handleEquip(roomId)}
+                    />
+                  );
+                })
+              : CAT_BED_IDS.map((bedId) => {
+                  const price = getBedStorePrice(bedId);
+                  const owned = isBedUnlocked(bedId, unlockedBeds);
+                  const canAfford =
+                    price.kind !== "coins" || wallet.coins >= price.amount;
+
+                  return (
+                    <BedStoreCard
+                      key={bedId}
+                      bedId={bedId}
+                      isOwned={owned}
+                      isEquipped={equippedBedId === bedId}
+                      canAfford={canAfford}
+                      onBuy={() => handleBuyBed(bedId)}
+                      onEquip={() => handleEquipBed(bedId)}
+                    />
+                  );
+                })}
           </ScrollView>
         </View>
       </View>
