@@ -1,6 +1,6 @@
 import { GameHeaderStats } from "@/components/economy/GameHeaderStats";
 import { PetStage } from "@/components/pet/PetStage";
-import { PuzzleStreakBanner } from "@/components/pet/PuzzleStreakBanner";
+import { PuzzleStreakSlot } from "@/components/pet/PuzzleStreakSlot";
 import {
   BATH_HAPPINESS_BOOST,
   BATH_CLEANLINESS_RESTORE,
@@ -335,25 +335,28 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        <View style={styles.stageWrap}>
-          <PetStage
-            compact
-            name={pet.name}
-            petType={pet.type}
-            stats={pet.stats}
-            wisdom={computePetWisdom(progress.puzzlesSolved)}
-            speechMessage={speechMessage}
-            playback={playback}
-            onPetPress={petAnimating ? undefined : handlePetTap}
-            onAnimationComplete={handleAnimationComplete}
+        <View style={styles.middle}>
+          <View style={styles.stageWrap}>
+            <PetStage
+              compact
+              name={pet.name}
+              petType={pet.type}
+              stats={pet.stats}
+              wisdom={computePetWisdom(progress.puzzlesSolved)}
+              speechMessage={speechMessage}
+              playback={playback}
+              onPetPress={petAnimating ? undefined : handlePetTap}
+              onAnimationComplete={handleAnimationComplete}
+            />
+          </View>
+
+          <PuzzleStreakSlot
+            visible={showPuzzleStreak}
+            count={progress.puzzleStreak}
           />
         </View>
 
         <View style={styles.footer}>
-          {showPuzzleStreak ? (
-            <PuzzleStreakBanner count={progress.puzzleStreak} />
-          ) : null}
-
           <View style={styles.actions}>
             <Pressable
               style={[
@@ -445,12 +448,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(16),
     paddingTop: moderateScale(4),
     paddingBottom: moderateScale(8),
+  },
+  middle: {
+    flex: 1,
+    minHeight: 0,
     gap: moderateScale(10),
+    marginBottom: moderateScale(10),
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     gap: moderateScale(6),
+    marginBottom: moderateScale(10),
   },
   headerStats: {
     flex: 1,
