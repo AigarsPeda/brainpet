@@ -1,13 +1,13 @@
 # Math Mews — GitHub Pages (privacy policy)
 
-**URL:** https://aigarspeda.github.io/brainpet/privacy.html
+**URL:** https://aigarspeda.github.io/MathMews/privacy.html
 
 ---
 
 ## Setup (one-time)
 
 1. Open **Settings → Pages**:  
-   https://github.com/AigarsPeda/brainpet/settings/pages
+   https://github.com/AigarsPeda/MathMews/settings/pages
 
 2. Under **Build and deployment → Source**, choose **GitHub Actions** (not “Deploy from a branch”).
 
@@ -16,7 +16,7 @@
 4. **Actions** → **Deploy GitHub Pages** → confirm it runs green, or use **Run workflow**.
 
 5. Wait 1–2 minutes. Refresh:  
-   https://aigarspeda.github.io/brainpet/privacy.html
+   https://aigarspeda.github.io/MathMews/privacy.html
 
 **Why GitHub Actions?** Branch deploy runs a built-in workflow on **every** push to `main`. Our workflow only runs when files under **`docs/`** change (or the workflow file itself).
 
@@ -29,7 +29,7 @@
 | Source is still “Deploy from a branch” | Switch to **GitHub Actions** (see above) |
 | Workflow never ran | Push a change under `docs/`, or **Actions → Run workflow** |
 | Just saved | Wait 2–5 minutes for first deploy |
-| File missing | Confirm [docs/privacy.html](https://github.com/AigarsPeda/brainpet/blob/main/docs/privacy.html) exists on `main` |
+| File missing | Confirm [docs/privacy.html](https://github.com/AigarsPeda/MathMews/blob/main/docs/privacy.html) exists on `main` |
 
 **Do not** use the “Static HTML” / “Jekyll” buttons on the Pages screen.
 
@@ -44,7 +44,7 @@ If **Deploy GitHub Pages** fails with *“in progress deployment”*:
 3. **Re-run** the latest failed job (one at a time).
 
 If a **`gh-pages`** branch exists from old experiments, you can delete it:  
-https://github.com/AigarsPeda/brainpet/branches
+https://github.com/AigarsPeda/MathMews/branches
 
 ---
 
@@ -53,7 +53,7 @@ https://github.com/AigarsPeda/brainpet/branches
 Privacy Policy URL:
 
 ```
-https://aigarspeda.github.io/brainpet/privacy.html
+https://aigarspeda.github.io/MathMews/privacy.html
 ```
 
 Same as `PRIVACY_POLICY_URL` in `constants/legal.ts`.
