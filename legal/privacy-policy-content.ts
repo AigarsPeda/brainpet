@@ -17,7 +17,7 @@ export type PrivacyPolicyContent = {
 
 const EN: PrivacyPolicyContent = {
   screenTitle: "Privacy policy",
-  screenHint: "How BrainPet handles your child's data.",
+  screenHint: "How BrainPet handles your data.",
   lastUpdatedLabel: `Last updated: ${PRIVACY_POLICY_LAST_UPDATED}`,
   viewOnline: "View online",
   contactLabel: "Questions?",
@@ -25,7 +25,7 @@ const EN: PrivacyPolicyContent = {
     {
       title: "Overview",
       paragraphs: [
-        "BrainPet is an educational math game with a virtual pet for children roughly ages 7–12. This policy explains what information the app processes and how it is used.",
+        "BrainPet is an educational math game with a virtual pet. It can be enjoyed at any age. This policy explains what information the app processes and how it is used.",
         "We designed BrainPet so children can play without creating an account or entering an email address.",
       ],
     },
@@ -79,7 +79,7 @@ const EN: PrivacyPolicyContent = {
     {
       title: "Children's privacy",
       paragraphs: [
-        "BrainPet is intended for children with a parent or guardian's permission. Parents should supervise purchases and help with restore if needed.",
+        "BrainPet is suitable for all ages. If a child plays, a parent or guardian should supervise purchases and help with restore if needed.",
         "If you believe we have collected a child's personal information in error, contact us and we will delete it.",
       ],
     },
@@ -105,7 +105,7 @@ const EN: PrivacyPolicyContent = {
 
 const LV: PrivacyPolicyContent = {
   screenTitle: "Privātuma politika",
-  screenHint: "Kā BrainPet apstrādā bērna datus.",
+  screenHint: "Kā BrainPet apstrādā tavus datus.",
   lastUpdatedLabel: `Pēdējoreiz atjaunināts: ${PRIVACY_POLICY_LAST_UPDATED}`,
   viewOnline: "Skatīt tiešsaistē",
   contactLabel: "Jautājumi?",
@@ -113,7 +113,7 @@ const LV: PrivacyPolicyContent = {
     {
       title: "Pārskats",
       paragraphs: [
-        "BrainPet ir izglītojoša matemātikas spēle ar virtuālu mīluli bērniem aptuveni 7–12 gadu vecumā. Šī politika skaidro, kādu informāciju lietotne apstrādā un kā tā tiek izmantota.",
+        "BrainPet ir izglītojoša matemātikas spēle ar virtuālu mīluli. To var spēlēt jebkurā vecumā. Šī politika skaidro, kādu informāciju lietotne apstrādā un kā tā tiek izmantota.",
         "BrainPet ir veidots tā, lai bērni varētu spēlēt bez konta izveides vai e-pasta ievadīšanas.",
       ],
     },
@@ -167,7 +167,7 @@ const LV: PrivacyPolicyContent = {
     {
       title: "Bērnu privātums",
       paragraphs: [
-        "BrainPet ir paredzēts bērniem ar vecāka vai aizbildņa atļauju. Vecākiem jāuzrauga pirkumi un jāpalīdz ar atjaunošanu, ja nepieciešams.",
+        "BrainPet ir piemērots jebkuram vecumam. Ja spēlē bērns, vecākam vai aizbildnim jāuzrauga pirkumi un jāpalīdz ar atjaunošanu, ja nepieciešams.",
         "Ja uzskati, ka esam kļūdaini savākuši bērna personas informāciju, sazinies ar mums — mēs to dzēsīsim.",
       ],
     },
